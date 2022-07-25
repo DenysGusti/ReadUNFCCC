@@ -54,7 +54,4 @@ class Files:
 
             countries_dict[result_file_path] = files_dir_list
 
-        for country_dest, country_sources in countries_dict.items():
-            print(f'{country_dest = }\n{country_sources = }\n')
-
         return countries_dict

@@ -9,7 +9,7 @@ def main():
 
     # non-default optional settings
     files.countriesDirList = 'aus-2021-crf-15apr21',  # , is needed!!!
-    files.sheetsList = 'Table4',  # , is needed!!!
+    files.sheetsList = 'Table4', 'Table4.1',  # , is needed!!!
     # files.years = 1990,  # , is needed!!!
 
     countries_dict = files.createCountriesDict()
@@ -17,7 +17,7 @@ def main():
 
     for country_dest, country_sources in countries_dict.items():
         county_table = Table(country_dest=country_dest, country_sources=country_sources, sheets_list=sheets_list)
-        county_table.createFile()
+        county_table.writeFile()
 
 
 if __name__ == "__main__":

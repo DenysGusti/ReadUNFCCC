@@ -25,7 +25,7 @@ class Patterns:
             else:
                 prev_cell = cell if type(cell) == float else -1
 
-            if str(cell)[:3] == '(1)':
+            if str(cell)[:3] == '(1)':  # Gs2 additional info!
                 max_row = row - 2
                 break
 
@@ -40,24 +40,22 @@ class Patterns:
         return new_structure, name, max_row
 
     @calculate_time
-    def Table4(self) -> dict[str | int, list]:
+    def Table4X(self) -> dict[str | int, list]:
         new_data: dict[str | int, list] = dict()
 
-        table_name: str = f'{self._name}     {list(self._structure[self._name].values())[0]}'
-        new_data[table_name] = []
-        prev_cell: float = -1
-        add_flag: bool = False
-        data_start_row: int = -1
-        for row, cell in self._structure[self._name].items():
-            if math.isnan(prev_cell) and type(cell) == str and not add_flag:
-                add_flag = True
-                data_start_row = row
-            else:
-                prev_cell = cell if type(cell) == float else -1
+        match self._name:
+            case 'TABLE 4 SECTORAL REPORT FOR LAND USE, LAND-USE CHANGE AND FORESTRY':
+                table_name: str = f'{self._name}     {list(self._structure[self._name].values())[0]}'
 
-            if add_flag:
-                new_data[table_name].append(cell)
+            case 'Table 4.1  LAND TRANSITION MATRIX':
+                table_name: str = f'{self._name}     {list(self._structure[self._name].values())[1]} ' \
+                                  f'{list(self._structure[self._name].values())[0]}'
 
+            case _:
+                table_name = ''
+                print("Unexpected name")
+
+        new_data[table_name] = list(self._structure[self._name].values())[2:]
         first_row: int = list(self._structure[self._name].keys())[0]
         new_data['Rows'] = [v[first_row] for v in list(self._structure.values())[1:]]
 
@@ -71,6 +69,7 @@ class Patterns:
         new_data['Units'] = [units] * len(new_data['Rows'])
         new_data[table_name] = tmp_list
 
+        data_start_row: int = 5
         for year, data in self._year_df_dict.items():
             new_data[year] = []
 
@@ -81,5 +80,17 @@ class Patterns:
                     else:
                         new_data[year].append('NA')
 
-        print(new_data)
         return new_data
+
+
+"""        prev_cell: float = -1
+        add_flag: bool = False
+        for row, cell in self._structure[self._name].items():
+            if math.isnan(prev_cell) and type(cell) == str and not add_flag:
+                add_flag = True
+                data_start_row = row
+            else:
+                prev_cell = cell if type(cell) == float else -1
+
+            if add_flag:
+                new_data[table_name].append(cell)"""

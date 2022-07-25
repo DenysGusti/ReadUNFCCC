@@ -14,42 +14,49 @@ class Table:
         self._country_dest: Path = country_dest
         self._country_sources: list[Path] = country_sources
         self._sheets_list: list[str] = sheets_list
-
-        print(self._country_dest, self._country_sources, self._sheets_list)
+        self._sheet_df_dict: dict[str, pd.DataFrame] = self.createDataDict()
 
     def getYearTableDict(self, sheet_name: str) -> dict[int, dict]:
         return {int(file_path.name[9:13]): pd.read_excel(file_path, sheet_name=sheet_name, engine='openpyxl').to_dict()
                 for file_path in self._country_sources}
 
     @calculate_time
-    def createFile(self) -> None:
+    def createDataDict(self) -> dict[str: pd.DataFrame]:
+        sheet_df_dict: dict[str: pd.DataFrame] = dict()
+        processed_data: dict[str, list] = dict()
+
+        for sheet in self._sheets_list:
+            year_df_dict: dict[int, dict[str, dict]] = self.getYearTableDict(sheet)
+            table = Patterns(year_df_dict)
+            flag: bool = True
+
+            match sheet:
+                case 'Table4' | 'Table4.1':
+                    processed_data: dict[str, list] = table.Table4X()
+
+                case sheet if sheet[-1].isalpha() and sheet[-1].isupper():
+                    print(f'TODO alpha {sheet}')
+
+                case sheet if sheet[6] == '(' and sheet[-1] == ')':
+                    print(f'roman {sheet} not planned yet')
+
+                case 'Table4.Gs1' | 'Table4.Gs2':
+                    print(f'new {sheet} not planned yet')
+
+                case _:
+                    flag = False
+                    print(f'Unexpected sheet name: {sheet}')
+
+            if flag:
+                sheet_df_dict[sheet] = pd.DataFrame(data=processed_data)
+
+        return sheet_df_dict
+
+    def writeFile(self):
         try:
-            for sheet in self._sheets_list:
-                match sheet:
-                    case 'Table4':
-                        print(f'TODO Table4')
-                        year_df_dict: dict[int, dict[str, dict]] = self.getYearTableDict(sheet)
-                        for k, v in year_df_dict.items():
-                            print(f'\n\n{k}\n\n{v}\n\n')
-                        table = Patterns(year_df_dict)
-                        processed_data: dict[str, list] = table.Table4()
-                        processed_df: pd.DataFrame = pd.DataFrame(data=processed_data)
-                        processed_df.to_excel(self._country_dest, index=False, sheet_name=sheet)
-
-                    case 'Table4.1':
-                        print(f'TODO Table4.1')
-
-                    case sheet if sheet[-1].isalpha() and sheet[-1].isupper():
-                        print(f'TODO alpha {sheet}')
-
-                    case sheet if sheet[6] == '(' and sheet[-1] == ')':
-                        print(f'roman {sheet} not planned yet')
-
-                    case 'Table4.Gs1' | 'Table4.Gs2':
-                        print(f'new {sheet} not planned yet')
-
-                    case _:
-                        print(f'Unexpected sheet name: {sheet}')
+            with pd.ExcelWriter(self._country_dest, engine='openpyxl') as writer:
+                for sheet, df in self._sheet_df_dict.items():
+                    df.to_excel(writer, sheet_name=sheet, index=False)
 
         except PermissionError:
             logging.exception("\n\nClose destination xlsx files!\n\n")
