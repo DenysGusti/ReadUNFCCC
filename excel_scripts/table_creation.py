@@ -1,76 +1,48 @@
-from time import time
+import pandas as pd
 from pathlib import Path
-from sheets_patterns import SheetsPatterns
+from sheets_patterns import Patterns
+from auxiliary_functions import calculate_time
 
 
-def calculate_time(func):
-    def wrapper(*args, **kwargs):
-        t = time()
-        returned_value = func(*args, **kwargs)
-        print(f'time spent in {func.__name__}: {time() - t}s')
-        return returned_value
-
-    return wrapper
-
-
-class TableCreation:
+class Table:
     """
-    File logic
+    making xlsx file
     """
 
-    def __init__(self, *, folder_path: str):
-        self._folder_path = Path(folder_path)
-        self._data_path = self._folder_path / 'original'
-        self._result_path = self._folder_path / 'extracted'
+    def __init__(self, *, country_dest: Path, country_sources: list[Path], sheets_list: list[str]):
+        self._country_dest: Path = country_dest
+        self._country_sources: list[Path] = country_sources
+        self._sheets_list: list[str] = sheets_list
 
-        self._countries_dir_list: list[Path] = [x for x in self._data_path.iterdir() if x.is_dir()]
-
-        self._sheets_list: list[str] = ['Table4', 'Table4.1', 'Table4.A', 'Table4.B', 'Table4.C', 'Table4.D',
-                                        'Table4.E', 'Table4.F']
-
-        self._years: list[str] = [str(i) for i in range(1990, 2020)]
-
-    @property
-    def countriesDirList(self) -> list[Path]:
-        return self._countries_dir_list
-
-    @countriesDirList.setter
-    def countriesDirList(self, country_folder_names: tuple[str]):
-        self._countries_dir_list = [self._data_path / x for x in country_folder_names]
-
-    @property
-    def sheetsList(self) -> list[str]:
-        return self._sheets_list
-
-    @sheetsList.setter
-    def sheetsList(self, new_sheets_list: tuple[str]):
-        self._sheets_list = list(new_sheets_list)
-
-    @property
-    def years(self) -> list[str]:
-        return self._years
-
-    @years.setter
-    def years(self, new_years: tuple[int]):
-        self._years = [str(i) for i in new_years]
+        print(self._country_dest, self._country_sources, self._sheets_list)
 
     @calculate_time
-    def makeTables(self):
-        for country_dir in self._countries_dir_list:
-            print(country_dir)
+    def createFile(self) -> None:
 
-            result_file_path: Path = self._result_path / f"{country_dir.name[:8].replace('-', '_')}.xlsx"
-            files_dir_list: list[Path] = [x for x in country_dir.glob('**/*.xlsx')
-                                          if "~$" not in str(x) and x.name[9:13] in self._years]
-            print(f'{result_file_path = }\n{files_dir_list = }')
+        def getYearDfDict(sheet_name: str) -> dict[str, pd.DataFrame]:
+            return {file_path.name[9:13]: pd.read_excel(file_path, sheet_name=sheet_name, engine='openpyxl')
+                    for file_path in self._country_sources}
 
-            for file_dir in files_dir_list:
-                year: str = file_dir.name[9:13]
-                print(f'{year = }')
+        for sheet in self._sheets_list:
+            match sheet:
+                case 'Table4':
+                    print(f'TODO Table4')
+                    year_df_dict = getYearDfDict(sheet)
+                    for k, v in year_df_dict.items():
+                        print(f'\n\n{k}\n\n{v}\n\n')
+                    # SheetsPatterns.Table4(file_dir)
 
-                for sheet in self._sheets_list:
-                    match sheet:
-                        case 'Table4':
-                            SheetsPatterns.Table4(file_dir)
-                        case _:
-                            print("TODO")
+                case 'Table4.1':
+                    print(f'TODO Table4.1')
+
+                case sheet if sheet[-1].isalpha() and sheet[-1].isupper():
+                    print(f'TODO alpha {sheet}')
+
+                case sheet if sheet[6] == '(' and sheet[-1] == ')':
+                    print(f'roman {sheet} not planned yet')
+
+                case 'Table4.Gs1' | 'Table4.Gs2':
+                    print(f'new {sheet} not planned yet')
+
+                case _:
+                    print(f'Unexpected sheet name: {sheet}')

@@ -1,14 +1,14 @@
 import pandas as pd
 
 
-class SheetsPatterns:
+class Patterns:
     """
     Different processing for every xlsx sheet type
     """
 
     @staticmethod
-    def Table4(file_dir):
-        df: pd.DataFrame = pd.read_excel(file_dir, sheet_name='Table4', engine='openpyxl')
+    def Table4(df: pd.DataFrame):
+        pass
+        # df: pd.DataFrame = pd.read_excel(file_dir, sheet_name='Table4', engine='openpyxl')
 
-# TODO Table4 обробка
-# test
+# TODO Table4
