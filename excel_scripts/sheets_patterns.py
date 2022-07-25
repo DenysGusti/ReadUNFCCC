@@ -1,4 +1,5 @@
 import math
+from auxiliary_functions import calculate_time
 
 
 class Patterns:
@@ -36,11 +37,11 @@ class Patterns:
                     tmp_dict[row] = data
             new_structure[key] = tmp_dict
 
-        print(new_structure)
         return new_structure, name, max_row
 
-    def Table4(self) -> dict[str, list]:
-        new_data: dict[str, list] = dict()
+    @calculate_time
+    def Table4(self) -> dict[str | int, list]:
+        new_data: dict[str | int, list] = dict()
 
         table_name: str = list(self._structure[self._name].values())[0]
         new_data[table_name] = []
@@ -58,7 +59,7 @@ class Patterns:
                 new_data[table_name].append(cell)
 
         first_row: int = list(self._structure[self._name].keys())[0]
-        new_data['Rows'] = [v[first_row] for v in self._structure.values() if v[first_row] != table_name]
+        new_data['Rows'] = [v[first_row] for v in list(self._structure.values())[1:]]
 
         tmp_list = []
         for el in new_data[table_name]:
@@ -66,23 +67,23 @@ class Patterns:
             tmp_list += ['' for _ in range(len(new_data['Rows']) - 1)]
 
         units: str = self._structure[list(self._structure.keys())[1]][first_row + 1]
-        new_data['Rows'] = [f'{x}, {units}' for x in new_data['Rows']]
         new_data['Rows'] *= len(new_data[table_name])
-
+        new_data['Units'] = [units] * len(new_data['Rows'])
         new_data['Rows'].append('')
+        new_data['Units'].append('')
         tmp_list.append(self._name)
         new_data[table_name] = tmp_list
 
-        print(new_data)
-        print(f'{data_start_row = }')
-
         for year, data in self._year_df_dict.items():
-            print(year)
-            print(data)
+            new_data[year] = []
+
+            for i in range(data_start_row, self._last_row + 1):
+                for cells in list(data.values())[1:]:
+                    if (type(cells[i]) == float and not math.isnan(cells[i])) or type(cells[i]) == str:
+                        new_data[year].append(cells[i])
+                    else:
+                        new_data[year].append('NA')
+
+            new_data[year].append('')
 
         return new_data
-
-
-# TODO Table4
-"""        for k, v in self._year_df_dict[1990].to_dict().items():
-            print(f"{k}\n{v}\n\n")"""

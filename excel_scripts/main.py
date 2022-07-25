@@ -10,7 +10,7 @@ def main():
     # non-default optional settings
     files.countriesDirList = 'aus-2021-crf-15apr21',  # , is needed!!!
     files.sheetsList = 'Table4',  # , is needed!!!
-    files.years = 1990,  # , is needed!!!
+    # files.years = 1990,  # , is needed!!!
 
     countries_dict = files.createCountriesDict()
     sheets_list = files.sheetsList
