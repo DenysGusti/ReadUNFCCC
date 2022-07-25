@@ -8,8 +8,8 @@ def main():
     files = Files(folder_path=r'C:\Users\denys\PycharmProjects\ReadUNFCCC\data\2021')
 
     # non-default optional settings
-    files.countriesDirList = 'aus-2021-crf-15apr21',  # , is needed!!!
-    files.sheetsList = 'Table4', 'Table4.1',  # , is needed!!!
+    # files.countriesDirList = 'aus-2021-crf-15apr21',  # , is needed!!!
+    # files.sheetsList = 'Table4.A',  # , is needed!!!
     # files.years = 1990,  # , is needed!!!
 
     countries_dict = files.createCountriesDict()

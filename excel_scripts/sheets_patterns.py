@@ -39,8 +39,7 @@ class Patterns:
 
         return new_structure, name, max_row
 
-    @calculate_time
-    def Table4X(self) -> dict[str | int, list]:
+    def Table4Digit(self) -> dict[str | int, list]:
         new_data: dict[str | int, list] = dict()
 
         match self._name:
@@ -57,16 +56,16 @@ class Patterns:
 
         new_data[table_name] = list(self._structure[self._name].values())[2:]
         first_row: int = list(self._structure[self._name].keys())[0]
-        new_data['Rows'] = [v[first_row] for v in list(self._structure.values())[1:]]
+        new_data['Columns'] = [v[first_row] for v in list(self._structure.values())[1:]]
 
         tmp_list = []
         for el in new_data[table_name]:
             tmp_list.append(el)
-            tmp_list += ['' for _ in range(len(new_data['Rows']) - 1)]
+            tmp_list += ['' for _ in range(len(new_data['Columns']) - 1)]
 
         units: str = self._structure[list(self._structure.keys())[1]][first_row + 1]
-        new_data['Rows'] *= len(new_data[table_name])
-        new_data['Units'] = [units] * len(new_data['Rows'])
+        new_data['Columns'] *= len(new_data[table_name])
+        new_data['Units'] = [units] * len(new_data['Columns'])
         new_data[table_name] = tmp_list
 
         data_start_row: int = 5
@@ -82,15 +81,60 @@ class Patterns:
 
         return new_data
 
+    def Table4Alpha(self) -> dict[str | int, list]:
+        new_data: dict[str | int, list] = dict()
 
-"""        prev_cell: float = -1
-        add_flag: bool = False
-        for row, cell in self._structure[self._name].items():
-            if math.isnan(prev_cell) and type(cell) == str and not add_flag:
-                add_flag = True
-                data_start_row = row
-            else:
-                prev_cell = cell if type(cell) == float else -1
+        table_name: str = f'{self._name}     {list(self._structure[self._name].values())[0]}     ' \
+                          f'{list(self._structure[self._name].values())[1]}'
+        new_data[table_name] = list(self._structure[self._name].values())[5:]
 
-            if add_flag:
-                new_data[table_name].append(cell)"""
+        sub_name: str = list(self._structure.keys())[1]
+        sub_table_name: str = f'Subcategory     {list(self._structure[sub_name].values())[1]}'
+        new_data[sub_table_name] = list(self._structure[sub_name].values())[5:]
+
+        first_row: int = list(self._structure[self._name].keys())[0]
+
+        for i in range(first_row, first_row + 4):
+            new_data[f'Columns_{min(i - first_row, 2)}'] = [v[i] if type(v[i]) == str else ''
+                                                            for v in list(self._structure.values())[2:]]
+
+        new_data['Units'] = [v[first_row + 4] if type(v[first_row + 4]) == str else ''
+                             for v in list(self._structure.values())[2:]]
+        for i in range(3):
+            new_data['Columns_1'][i], new_data['Units'][i] = new_data['Columns_1'][i].split('\n')
+
+        prev_el = ''
+        tmp_list = []
+        for el in new_data['Units']:
+            if el == '':
+                el = prev_el
+            prev_el = el
+            tmp_list.append(el)
+        new_data['Units'] = tmp_list
+
+        tmp_list0, tmp_list1 = [], []
+        for el in new_data[table_name]:
+            tmp_list0.append(el)
+            tmp_list0 += ['' for _ in range(len(new_data['Columns_1']) - 1)]
+        for el in new_data[sub_table_name]:
+            tmp_list1.append(el)
+            tmp_list1 += ['' for _ in range(len(new_data['Columns_1']) - 1)]
+
+        for i in range(3):
+            new_data[f'Columns_{i}'] *= len(new_data[table_name])
+
+        new_data['Units'] *= len(new_data[table_name])
+        new_data[table_name], new_data[sub_table_name] = tmp_list0, tmp_list1
+
+        data_start_row: int = 8
+        for year, data in self._year_df_dict.items():
+            new_data[year] = []
+
+            for i in range(data_start_row, self._last_row + 1):
+                for cells in list(data.values())[2:]:
+                    if (type(cells[i]) == float and not math.isnan(cells[i])) or type(cells[i]) == str:
+                        new_data[year].append(cells[i])
+                    else:
+                        new_data[year].append('NA')
+
+        return new_data

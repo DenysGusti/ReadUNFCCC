@@ -32,10 +32,10 @@ class Table:
 
             match sheet:
                 case 'Table4' | 'Table4.1':
-                    processed_data: dict[str, list] = table.Table4X()
+                    processed_data: dict[str, list] = table.Table4Digit()
 
                 case sheet if sheet[-1].isalpha() and sheet[-1].isupper():
-                    print(f'TODO alpha {sheet}')
+                    processed_data: dict[str, list] = table.Table4Alpha()
 
                 case sheet if sheet[6] == '(' and sheet[-1] == ')':
                     print(f'roman {sheet} not planned yet')
