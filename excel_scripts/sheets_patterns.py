@@ -1,5 +1,4 @@
 import math
-from auxiliary_functions import calculate_time
 
 
 class Patterns:
