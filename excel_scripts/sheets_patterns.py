@@ -43,7 +43,7 @@ class Patterns:
     def Table4(self) -> dict[str | int, list]:
         new_data: dict[str | int, list] = dict()
 
-        table_name: str = list(self._structure[self._name].values())[0]
+        table_name: str = f'{self._name}     {list(self._structure[self._name].values())[0]}'
         new_data[table_name] = []
         prev_cell: float = -1
         add_flag: bool = False
@@ -69,9 +69,6 @@ class Patterns:
         units: str = self._structure[list(self._structure.keys())[1]][first_row + 1]
         new_data['Rows'] *= len(new_data[table_name])
         new_data['Units'] = [units] * len(new_data['Rows'])
-        new_data['Rows'].append('')
-        new_data['Units'].append('')
-        tmp_list.append(self._name)
         new_data[table_name] = tmp_list
 
         for year, data in self._year_df_dict.items():
@@ -84,6 +81,5 @@ class Patterns:
                     else:
                         new_data[year].append('NA')
 
-            new_data[year].append('')
-
+        print(new_data)
         return new_data

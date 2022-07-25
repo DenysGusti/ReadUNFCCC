@@ -34,7 +34,7 @@ class Table:
                         table = Patterns(year_df_dict)
                         processed_data: dict[str, list] = table.Table4()
                         processed_df: pd.DataFrame = pd.DataFrame(data=processed_data)
-                        processed_df.to_excel(self._country_dest, index=False)
+                        processed_df.to_excel(self._country_dest, index=False, sheet_name=sheet)
 
                     case 'Table4.1':
                         print(f'TODO Table4.1')
