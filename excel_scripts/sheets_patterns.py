@@ -3,7 +3,7 @@ import math
 
 class Patterns:
     """
-    Different processing for every xlsx sheet type
+    Different processing for every xlsx sheet type (i.e. CRF table type)
     """
 
     def __init__(self, year_df_dict: dict[int, dict[str, dict]]):
@@ -15,7 +15,7 @@ class Patterns:
         old_structure: dict[str, dict] = self._year_df_dict[first_year]
         name: str = list(old_structure.keys())[0]
 
-        # cutting
+        # cutting the rows over the table
         min_row, max_row = 1, 10000
         prev_cell: float = -1
         for row, cell in old_structure[name].items():

@@ -13,9 +13,11 @@ class Files:
 
         self._countries_dir_list: list[Path] = [x for x in self._data_path.iterdir() if x.is_dir()]
 
+        # List of worksheets (CRF tables) to be processed
         self._sheets_list: list[str] = ['Table4', 'Table4.1', 'Table4.A', 'Table4.B', 'Table4.C', 'Table4.D',
                                         'Table4.E', 'Table4.F']
-
+            
+        # Range of years CRF tables of which to be processed
         self._years: list[str] = [str(i) for i in range(1990, 2020)]
 
     @property
