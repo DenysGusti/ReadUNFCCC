@@ -41,31 +41,27 @@ class Patterns:
     def Table4Digit(self) -> dict[str | int, list]:
         new_data: dict[str | int, list] = dict()
 
+        orig_rows_names = list(self._structure[self._name].values())
         match self._name:
             case 'TABLE 4 SECTORAL REPORT FOR LAND USE, LAND-USE CHANGE AND FORESTRY':
-                table_name: str = f'{self._name}     {list(self._structure[self._name].values())[0]}'
+                table_name: str = f'{self._name}     {orig_rows_names[0]}'
 
             case 'Table 4.1  LAND TRANSITION MATRIX':
-                table_name: str = f'{self._name}     {list(self._structure[self._name].values())[1]} ' \
-                                  f'{list(self._structure[self._name].values())[0]}'
+                table_name: str = f'{self._name}     {orig_rows_names[1]} {orig_rows_names[0]}'
 
             case _:
                 table_name = ''
                 print("Unexpected name")
 
-        new_data[table_name] = list(self._structure[self._name].values())[2:]
+        new_data[table_name] = [x.rstrip('. ') for x in orig_rows_names[2:]]
         first_row: int = list(self._structure[self._name].keys())[0]
-        new_data['Columns'] = [v[first_row] for v in list(self._structure.values())[1:]]
-
-        tmp_list = []
-        for el in new_data[table_name]:
-            tmp_list.append(el)
-            tmp_list += ['' for _ in range(len(new_data['Columns']) - 1)]
+        new_data['Column'] = [v[first_row].rstrip('. ') for v in list(self._structure.values())[1:]]
+        old_len = len(new_data[table_name])
+        new_data[table_name] = [el for el in new_data[table_name] for _ in range(len(new_data['Column']))]
 
         units: str = self._structure[list(self._structure.keys())[1]][first_row + 1]
-        new_data['Columns'] *= len(new_data[table_name])
-        new_data['Units'] = [units] * len(new_data['Columns'])
-        new_data[table_name] = tmp_list
+        new_data['Column'] *= old_len
+        new_data['Units'] = [units] * len(new_data['Column'])
 
         data_start_row: int = 5
         for year, data in self._year_df_dict.items():
@@ -83,47 +79,46 @@ class Patterns:
     def Table4Alpha(self) -> dict[str | int, list]:
         new_data: dict[str | int, list] = dict()
 
-        table_name: str = f'{self._name}     {list(self._structure[self._name].values())[0]}     ' \
-                          f'{list(self._structure[self._name].values())[1]}'
-        new_data[table_name] = list(self._structure[self._name].values())[5:]
+        orig_rows_names = list(self._structure[self._name].values())
+        table_name: str = f'{self._name}     {orig_rows_names[0]} {orig_rows_names[1]}'
+        new_data[table_name] = [x.rstrip('. ') for x in orig_rows_names[5:]]
 
         sub_name: str = list(self._structure.keys())[1]
-        sub_table_name: str = f'Subcategory     {list(self._structure[sub_name].values())[1]}'
-        new_data[sub_table_name] = list(self._structure[sub_name].values())[5:]
+        orig_sub_rows_names = list(self._structure[sub_name].values())
+        sub_table_name: str = f'Subcategory     {orig_sub_rows_names[1]}'
+        new_data[sub_table_name] = [x.rstrip('. ') if type(x) == str else '' for x in orig_sub_rows_names[5:]]
 
         first_row: int = list(self._structure[self._name].keys())[0]
 
+        orig_col_names = list(self._structure.values())[2:]
         for i in range(first_row, first_row + 4):
-            new_data[f'Columns_{min(i - first_row, 2)}'] = [v[i] if type(v[i]) == str else ''
-                                                            for v in list(self._structure.values())[2:]]
+            new_data[f'Column_{min(i - first_row, 2)}'] = [v[i] if type(v[i]) == str else ''
+                                                            for v in orig_col_names]
 
-        new_data['Units'] = [v[first_row + 4] if type(v[first_row + 4]) == str else ''
-                             for v in list(self._structure.values())[2:]]
+        new_data['Units'] = ['' for _ in range(3)]
         for i in range(3):
-            new_data['Columns_1'][i], new_data['Units'][i] = new_data['Columns_1'][i].split('\n')
+            new_data['Column_1'][i], new_data['Units'][i] = new_data['Column_1'][i].split('\n')
+        new_data['Units'] += [x[first_row + 4] if type(x[first_row + 4]) == str else '' for x in orig_col_names[3:]]
 
-        prev_el = ''
-        tmp_list = []
-        for el in new_data['Units']:
+        for i, el in enumerate(new_data['Units']):
             if el == '':
-                el = prev_el
-            prev_el = el
-            tmp_list.append(el)
-        new_data['Units'] = tmp_list
+                new_data['Units'][i] = new_data['Units'][i - 1]
 
-        tmp_list0, tmp_list1 = [], []
-        for el in new_data[table_name]:
-            tmp_list0.append(el)
-            tmp_list0 += ['' for _ in range(len(new_data['Columns_1']) - 1)]
-        for el in new_data[sub_table_name]:
-            tmp_list1.append(el)
-            tmp_list1 += ['' for _ in range(len(new_data['Columns_1']) - 1)]
+        for i, el in enumerate(new_data['Column_0']):
+            if el == '':
+                new_data['Column_0'][i] = new_data['Column_0'][i - 1]
+
+        for i, el in enumerate(new_data['Column_1']):
+            if el == '' and new_data['Column_2'][i] != '':
+                new_data['Column_1'][i] = new_data['Column_1'][i - 1]
+
+        old_len = len(new_data[table_name])
+        new_data[table_name] = [el for el in new_data[table_name] for _ in range(len(new_data['Column_1']))]
+        new_data[sub_table_name] = [el for el in new_data[sub_table_name] for _ in range(len(new_data['Column_1']))]
 
         for i in range(3):
-            new_data[f'Columns_{i}'] *= len(new_data[table_name])
-
-        new_data['Units'] *= len(new_data[table_name])
-        new_data[table_name], new_data[sub_table_name] = tmp_list0, tmp_list1
+            new_data[f'Column_{i}'] *= old_len
+        new_data['Units'] *= old_len
 
         data_start_row: int = 8
         for year, data in self._year_df_dict.items():
