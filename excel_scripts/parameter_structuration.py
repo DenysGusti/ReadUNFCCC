@@ -13,7 +13,7 @@ class Structuration:
     def __init__(self, *, folder_path: str):
         self._folder_path = Path(folder_path)
         self._data_path = self._folder_path / 'extracted'
-        self._result_path = self._folder_path / 'structured' / 'UNFCC_t.xlsx'
+        self._result_path = self._folder_path / 'structured' / 'UNFCCC_2021_timeseries.xlsx'
 
         # names without units and '. '! copy from extracted
         # sheet - sum of parameters: table - row and column categories
