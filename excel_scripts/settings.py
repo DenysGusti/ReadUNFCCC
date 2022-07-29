@@ -25,7 +25,7 @@ COUNTRIES_DICT: dict[Path, list[Path]] = {
 #
 CREATE_TIME_SERIES: bool = True
 
-PARAMETERS: dict[str, dict[str, list[str | float]]] = {
+PARAMETERS: dict[str, dict[str, list[str | float]]] = {  # if field is empty, fill it with float('nan')
     'Deforestation': {
         'Table4.B': ['Forest land converted to', float('nan'), 'ACTIVITY DATA', 'Total area(2)', float('nan'), '(kha)'],
         'Table4.C': ['Forest land converted to', float('nan'), 'ACTIVITY DATA', 'Total area(2)', float('nan'), '(kha)'],
