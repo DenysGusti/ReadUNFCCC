@@ -19,12 +19,11 @@ class TimeSeries:
 
     @calculateTime
     def makeCountriesData(self) -> dict[str, pd.DataFrame]:
-        result_dict: dict[str, pd.DataFrame] = dict()
+        result_dict: dict[str, pd.DataFrame] = {}
 
         # only for Table4.Alpha
         for sheet, tables in self._parameters.items():
-            new_data: dict[str | int, list] = dict()
-            new_data['Country_ISO'] = [x.name[:3] for x in self._countries_names]
+            new_data: dict[str | int, list] = {'Country_ISO': [x.name[:3] for x in self._countries_names]}
 
             # common name
             for i, k in enumerate(['Category', 'Subcategory', 'Column_0', 'Column_1', 'Column_2', 'Units']):

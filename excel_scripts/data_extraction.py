@@ -37,7 +37,7 @@ class Patterns:
         return new_structure, name, max_row
 
     def Table4Digit(self) -> dict[str | int, list]:
-        new_data: dict[str | int, list] = dict()
+        new_data: dict[str | int, list] = {}
 
         orig_rows_names = list(self._structure[self._name].values())
         match self._name:
@@ -67,7 +67,7 @@ class Patterns:
         return new_data
 
     def Table4Alpha(self) -> dict[str | int, list]:
-        new_data: dict[str | int, list] = dict()
+        new_data: dict[str | int, list] = {}
 
         orig_rows_names = list(self._structure[self._name].values())
         table_name: str = f'{self._name}     {orig_rows_names[0]} {orig_rows_names[1]}'
@@ -130,20 +130,20 @@ class TableCreation:
 
     @calculateTime
     def createDataDict(self) -> dict[str: pd.DataFrame]:
-        sheet_df_dict: dict[str: pd.DataFrame] = dict()
-        processed_data: dict[str, list] = dict()
+        sheet_df_dict: dict[str: pd.DataFrame] = {}
 
         for sheet in self._sheets_list:
             year_df_dict: dict[int, dict[str, dict]] = self.getYearTableDict(sheet)
+            processed_data: dict[str | int, list] = {}
             table = Patterns(year_df_dict)
             successful: bool = True
 
             match sheet:
                 case 'Table4' | 'Table4.1':
-                    processed_data: dict[str, list] = table.Table4Digit()
+                    processed_data = table.Table4Digit()
 
                 case sheet if sheet[-1].isalpha() and sheet[-1].isupper():
-                    processed_data: dict[str, list] = table.Table4Alpha()
+                    processed_data = table.Table4Alpha()
 
                 case sheet if sheet[6] == '(' and sheet[-1] == ')':
                     print(f'roman {sheet} not planned yet')

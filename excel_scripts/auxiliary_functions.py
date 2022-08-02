@@ -21,4 +21,4 @@ def writeFile(*, destination: Path, sheet_df_dict: dict[str, pd.DataFrame]) -> N
                 df.to_excel(writer, sheet_name=sheet, index=False)
 
     except PermissionError:
-        logging.exception("\n\nClose destination xlsx files!\n\n")
+        logging.exception('\n\nClose destination xlsx files!\n\n')
