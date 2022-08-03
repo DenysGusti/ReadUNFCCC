@@ -48,9 +48,10 @@ TRUE
 CREATE_TIME_SERIES: bool = True
 
 '''
-Specify the parameter (user) names and CRF table categories from which the parameters will be taken, starting from user
-name of the parameter, then following the CRF table name, category, subcategory,... unit to uniquely identify the data
-(see examples below)
+Specify the parameter (user) names (e.g. Deforestation) and CRF table categories from which the parameters will be 
+taken, starting from user name of the parameter, then following the CRF table name, category, subcategory,... 
+unit to uniquely identify the data. If one of the subcategory in the CRF table is empty specify "nan" 
+(see examples below).
 '''
 PARAMETERS: dict[str, dict[str, list[str | float]]] = {  # if the field is empty, fill it with nan
     'Deforestation': {
@@ -62,7 +63,7 @@ PARAMETERS: dict[str, dict[str, list[str | float]]] = {  # if the field is empty
     },
     'Net DW (t C per ha)': {  # '/', ':' invalid
         'Table4.A': ['1. Forest land remaining forest land', nan, 'IMPLIED CARBON-STOCK-CHANGE FACTORS',
-                     'Net carbon stock change in dead wood per area', '', '(t C/ha)']
+                     'Net carbon stock change in dead wood per area', nan, '(t C/ha)']
     },
     'Net DW (kt C)': {
         'Table4.A': ['1. Forest land remaining forest land', nan,
