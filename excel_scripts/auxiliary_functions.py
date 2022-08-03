@@ -14,7 +14,7 @@ def calculateTime(func):
     return wrapper
 
 
-def writeFile(*, destination: Path, sheet_df_dict: dict[str, pd.DataFrame]) -> None:
+def writeFile(destination: Path, sheet_df_dict: dict[str, pd.DataFrame]) -> None:
     try:
         with pd.ExcelWriter(destination, engine='openpyxl') as writer:
             for sheet, df in sheet_df_dict.items():

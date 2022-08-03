@@ -41,7 +41,7 @@ class Patterns:
 
             case _:
                 table_name = ''
-                print('Unexpected name')
+                print('Unexpected table name')
 
         new_data[table_name] = [clearStr(x) for x in orig_row_names[2:]]
         first_row: int = list(self._structure[self._name].keys())[0]
@@ -71,8 +71,8 @@ class Patterns:
         new_data[sub_table_name] = [clearStr(x) if type(x) == str else x for x in orig_sub_names[5:]]
 
         first_row: int = list(self._structure[self._name].keys())[0]
-
         orig_col_names = list(self._structure.values())[2:]
+
         for i in range(first_row, first_row + 4):
             new_data[f'Column_{min(i - first_row, 2)}'] = [clearStr(v[i])
                                                            if type(v[i]) == str else v[i] for v in orig_col_names]
@@ -82,15 +82,14 @@ class Patterns:
             new_data['Column_1'][i], new_data['Units'][i] = new_data['Column_1'][i][:-5], new_data['Column_1'][i][-5:]
         new_data['Units'] += [x[first_row + 4] for x in orig_col_names[3:]]
 
-        for column in ['Units', 'Column_0', 'Column_1']:
-            for i, el in enumerate(new_data[column]):
-                if type(el) == float and (
-                        column != 'Column_1' or column == 'Column_1' and type(new_data['Column_2'][i]) == str):
-                    new_data[column][i] = new_data[column][i - 1]
+        for c in ['Units', 'Column_0', 'Column_1']:
+            for i, el in enumerate(new_data[c]):
+                if type(el) == float and (c != 'Column_1' or c == 'Column_1' and type(new_data['Column_2'][i]) == str):
+                    new_data[c][i] = new_data[c][i - 1]
 
         old_len = len(new_data[table_name])
-        new_data[table_name] = [el for el in new_data[table_name] for _ in new_data['Units']]
-        new_data[sub_table_name] = [el for el in new_data[sub_table_name] for _ in new_data['Units']]
+        for category in [table_name, sub_table_name]:
+            new_data[category] = [el for el in new_data[category] for _ in new_data['Units']]
 
         for i in range(3):
             new_data[f'Column_{i}'] *= old_len
@@ -107,7 +106,7 @@ class TableCreation:
     making xlsx file
     """
 
-    def __init__(self, *, country_destination: Path, country_sources: list[Path], sheets_list: list[str]):
+    def __init__(self, country_destination: Path, country_sources: list[Path], sheets_list: list[str]):
         self._country_dest: Path = country_destination
         self._country_sources: list[Path] = country_sources
         self._sheets_list: list[str] = sheets_list
