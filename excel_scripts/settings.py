@@ -1,9 +1,10 @@
 from pathlib import Path
+from math import nan
 
 '''
 If you want to extract data from the original CRF tables submitted to the UNFCCC set this parameter to TRUE
 '''
-EXTRACT_DATA: bool = False
+EXTRACT_DATA: bool = True
 
 '''
 Specify the path where do you keep the downloaded CRF tables (the files for every country should be in a separate
@@ -30,7 +31,7 @@ COUNTRIES_LIST: list[Path] = [x for x in (DATA_PATH / 'original').iterdir() if x
 If you want to extract data only for some countries then uncomment the line below and specify the ISO3 codes of the
 countries (see example in the second line)
 '''
-# COUNTRIES_LIST: list[Path] = [x for x in COUNTRIES_LIST if x.name[:3] in ['bel', 'fra', 'isl']]
+# COUNTRIES_LIST: list[Path] = [x for x in COUNTRIES_LIST if x.name[:3] in ['aus']]
 
 COUNTRIES_DICT: dict[Path, list[Path]] = {
     DATA_PATH / 'extracted' / f"{country.name[:8].replace('-', '_')}.xlsx":
@@ -51,22 +52,22 @@ Specify the parameter (user) names and CRF table categories from which the param
 name of the parameter, then following the CRF table name, category, subcategory,... unit to uniquely identify the data
 (see examples below)
 '''
-PARAMETERS: dict[str, dict[str, list[str | float]]] = {  # if the field is empty, fill it with float('nan')
+PARAMETERS: dict[str, dict[str, list[str | float]]] = {  # if the field is empty, fill it with nan
     'Deforestation': {
-        'Table4.B': ['Forest land converted to', float('nan'), 'ACTIVITY DATA', 'Total area(2)', float('nan'), '(kha)'],
-        'Table4.C': ['Forest land converted to', float('nan'), 'ACTIVITY DATA', 'Total area(2)', float('nan'), '(kha)'],
-        'Table4.D': ['Forest land converted to', float('nan'), 'ACTIVITY DATA', 'Total area(2)', float('nan'), '(kha)'],
-        'Table4.E': ['Forest land converted to', float('nan'), 'ACTIVITY DATA', 'Total area(2)', float('nan'), '(kha)'],
-        'Table4.F': ['Forest land converted to', float('nan'), 'ACTIVITY DATA', 'Total area(2)', float('nan'), '(kha)']
+        'Table4.B': ['Forest land converted to', nan, 'ACTIVITY DATA', 'Total area', nan, '(kha)'],
+        'Table4.C': ['Forest land converted to', nan, 'ACTIVITY DATA', 'Total area', nan, '(kha)'],
+        'Table4.D': ['Forest land converted to', nan, 'ACTIVITY DATA', 'Total area', nan, '(kha)'],
+        'Table4.E': ['Forest land converted to', nan, 'ACTIVITY DATA', 'Total area', nan, '(kha)'],
+        'Table4.F': ['Forest land converted to', nan, 'ACTIVITY DATA', 'Total area', nan, '(kha)']
     },
     'Net DW (t C per ha)': {  # '/', ':' invalid
-        'Table4.A': ['1. Forest land remaining forest land', float('nan'), 'IMPLIED CARBON-STOCK-CHANGE FACTORS',
-                     'Net carbon stock change in dead wood per area(4)', '', '(t C/ha)']
+        'Table4.A': ['1. Forest land remaining forest land', nan, 'IMPLIED CARBON-STOCK-CHANGE FACTORS',
+                     'Net carbon stock change in dead wood per area', '', '(t C/ha)']
     },
     'Net DW (kt C)': {
-        'Table4.A': ['1. Forest land remaining forest land', float('nan'),
+        'Table4.A': ['1. Forest land remaining forest land', nan,
                      'CHANGES IN CARBON STOCK AND NET CO2 EMISSIONS/REMOVALS FROM SOILS',
-                     'Net carbon stock change in dead wood(4)', float('nan'), '(kt C)']
+                     'Net carbon stock change in dead wood', nan, '(kt C)']
     }
 }
 
@@ -75,7 +76,7 @@ If you want to create the timeseries only for some countries specify the ISO3 co
 second line below)
 '''
 COUNTRIES_NAMES: list[Path] = [x for x in (DATA_PATH / 'extracted').iterdir() if x.is_file()]
-# COUNTRIES_NAMES: list[Path] = [x for x in COUNTRIES_NAMES if x.name[:3] in ['bel', 'fra', 'isl']]
+# COUNTRIES_NAMES: list[Path] = [x for x in COUNTRIES_NAMES if x.name[:3] in ['aus']]
 
 '''
 Specify a range of years or single years for which you want to create the timeseries

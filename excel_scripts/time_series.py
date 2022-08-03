@@ -1,5 +1,5 @@
 import pandas as pd
-from math import isnan
+from math import nan, isnan
 from pathlib import Path
 from auxiliary_functions import calculateTime, writeFile
 
@@ -29,7 +29,7 @@ class TimeSeries:
             for i, k in enumerate(['Category', 'Subcategory', 'Column_0', 'Column_1', 'Column_2', 'Units']):
                 new_data[k] = [''.join(t[0] for t in zip(*[v[i] for v in tables.values()])
                                        if t.count(t[0]) == len(t)).rstrip()
-                               if all(type(v[i]) == str for v in tables.values()) else float('nan')
+                               if all(type(v[i]) == str for v in tables.values()) else nan
                                for _ in self._countries_names]
 
             for year in self._years_list:
@@ -38,7 +38,7 @@ class TimeSeries:
             for num, country in enumerate(self._countries_names):
                 for table, list_of_parameters in tables.items():
                     country_data: dict = pd.read_excel(country, sheet_name=table, engine='openpyxl').to_dict()
-                    columns: list[str] = list(country_data.keys())[:5]
+                    columns: list[str] = [*country_data.keys()][:5]
 
                     rows: list[int] = [i for i in list(country_data.values())[0].keys() if all(  # indexes
                         list_of_parameters[j] in cell if type(cell := country_data[columns[j]][i]) == str and type(

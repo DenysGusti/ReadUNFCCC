@@ -22,3 +22,11 @@ def writeFile(*, destination: Path, sheet_df_dict: dict[str, pd.DataFrame]) -> N
 
     except PermissionError:
         logging.exception('\n\nClose destination xlsx files!\n\n')
+
+
+def clearStr(str_in: str) -> str:
+    str_out = str_in.replace('\n', '')
+    for i in range(1, 10):
+        str_out = str_out.replace(f'({i})', '')
+    str_out = str_out.rstrip(' .,')
+    return str_out.rstrip(' .,')
