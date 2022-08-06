@@ -1,4 +1,4 @@
-from time import time
+from time import perf_counter
 from pathlib import Path
 import pandas as pd
 import logging
@@ -6,9 +6,9 @@ import logging
 
 def calculateTime(func):
     def wrapper(*args, **kwargs):
-        t = time()
+        t: float = perf_counter()
         returned_value = func(*args, **kwargs)
-        print(f'time spent in {func.__name__}: {time() - t}s')
+        print(f'time spent in {func.__name__}: {perf_counter() - t}s')
         return returned_value
 
     return wrapper
