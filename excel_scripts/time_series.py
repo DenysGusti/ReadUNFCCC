@@ -1,6 +1,8 @@
 import pandas as pd
+
 from math import nan, isnan
 from pathlib import Path
+
 from auxiliary_functions import calculateTime, writeFile
 
 

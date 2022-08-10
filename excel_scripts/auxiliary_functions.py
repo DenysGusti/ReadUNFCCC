@@ -1,6 +1,7 @@
+import pandas as pd
+
 from time import perf_counter
 from pathlib import Path
-import pandas as pd
 import logging
 
 

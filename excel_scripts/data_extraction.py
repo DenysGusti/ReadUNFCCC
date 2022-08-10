@@ -1,5 +1,7 @@
 import pandas as pd
+
 from pathlib import Path
+
 from auxiliary_functions import calculateTime, writeFile, clearStr
 
 
