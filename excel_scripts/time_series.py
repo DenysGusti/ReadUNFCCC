@@ -29,7 +29,7 @@ class TimeSeries:
             for i, category in enumerate(['Category', 'Subcategory', 'Column_0', 'Column_1', 'Column_2', 'Units']):
                 new_data[category] = [''.join(t[0] for t in zip(*[v[i] for v in tables.values()])
                                               if t.count(t[0]) == len(t)).rstrip()
-                                      if all(type(v[i]) == str for v in tables.values()) else nan
+                                      if all(isinstance(v[i], str) for v in tables.values()) else nan
                                       for _ in self._countries_names]
 
             for year in self._years_list:
@@ -41,12 +41,14 @@ class TimeSeries:
                     columns: list[str] = list(country_data.keys())[:5]
 
                     rows: list[int] = [i for i in list(country_data.values())[0].keys() if all(  # indexes
-                        list_of_parameters[j] in cell if type(cell := country_data[columns[j]][i]) == str and type(
-                            list_of_parameters[j]) == str else True for j in range(5))]
+                        list_of_parameters[j] in cell
+                        if isinstance(cell := country_data[columns[j]][i], str) and isinstance(
+                            list_of_parameters[j], str) else True for j in range(5))]
 
                     for y in self._years_list:
                         new_data[y][idx] += sum(
-                            cell if type(cell := country_data[y][r]) == float and not isnan(cell) else 0 for r in rows)
+                            cell if isinstance(cell := country_data[y][r], float) and not isnan(cell) else 0 for r in
+                            rows)
 
             result_dict[sheet] = pd.DataFrame(data=new_data)
 

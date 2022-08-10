@@ -19,7 +19,7 @@ class Patterns:
 
         # cutting the rows over the table
         min_row: int = min(row for row, cell in old_structure[name].items()
-                           if row > 0 and type(old_structure[name][row - 1]) == float and type(cell) == str)
+                           if row > 0 and isinstance(old_structure[name][row - 1], float) and isinstance(cell, str))
         max_row: int = min(row - 2 for row, cell in old_structure[name].items() if str(cell)[:3] == '(1)')
         # in Gs2 there is additional info after (1)...!
 
@@ -63,19 +63,19 @@ class Patterns:
 
         orig_row_names = list(self._structure[self._name].values())
         table_name: str = f'{self._name}     {orig_row_names[0]} {orig_row_names[1]}'
-        new_data[table_name] = [clearStr(x) if type(x) == str else x for x in orig_row_names[5:]]
+        new_data[table_name] = [clearStr(x) if isinstance(x, str) else x for x in orig_row_names[5:]]
 
         sub_name: str = list(self._structure.keys())[1]
         orig_sub_names = list(self._structure[sub_name].values())
         sub_table_name: str = f'Subcategory     {orig_sub_names[1]}'
-        new_data[sub_table_name] = [clearStr(x) if type(x) == str else x for x in orig_sub_names[5:]]
+        new_data[sub_table_name] = [clearStr(x) if isinstance(x, str) else x for x in orig_sub_names[5:]]
 
         first_row: int = list(self._structure[self._name].keys())[0]
         orig_col_names = list(self._structure.values())[2:]
 
         for i in range(first_row, first_row + 4):
             new_data[f'Column_{min(i - first_row, 2)}'] = [clearStr(v[i])
-                                                           if type(v[i]) == str else v[i] for v in orig_col_names]
+                                                           if isinstance(v[i], str) else v[i] for v in orig_col_names]
 
         new_data['Units']: list[str] = [''] * 3
         for i in range(3):
@@ -84,7 +84,8 @@ class Patterns:
 
         for c in ['Units', 'Column_0', 'Column_1']:
             for i, el in enumerate(new_data[c]):
-                if type(el) == float and (c != 'Column_1' or c == 'Column_1' and type(new_data['Column_2'][i]) == str):
+                if isinstance(el, float) and (
+                        c != 'Column_1' or c == 'Column_1' and isinstance(new_data['Column_2'][i], str)):
                     new_data[c][i] = new_data[c][i - 1]
 
         old_len = len(new_data[table_name])
