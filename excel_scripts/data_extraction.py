@@ -1,5 +1,7 @@
 import pandas as pd
 
+import openpyxl
+
 from pathlib import Path
 
 from auxiliary_functions import calculateTime, writeFile, clearStr
@@ -103,6 +105,52 @@ class Patterns:
 
         return new_data
 
+    def Table4Brackets(self) -> dict[str | int, list]:
+        new_data: dict[str | int, list] = {}
+
+        orig_row_names = list(self._structure[self._name].values())
+        table_name: str = f'{self._name}     {orig_row_names[0]} {orig_row_names[1]}'
+        new_data[table_name] = [clearStr(x) if isinstance(x, str) else x for x in orig_row_names[3:]]
+
+        sub_name: str = list(self._structure.keys())[1]
+        orig_sub_names = list(self._structure[sub_name].values())
+        sub_table_name: str = f'Subcategory     {orig_sub_names[1]}'
+        new_data[sub_table_name] = [clearStr(x) if isinstance(x, str) else x for x in orig_sub_names[3:]]
+
+        first_row: int = list(self._structure[self._name].keys())[0]
+        orig_col_names = list(self._structure.values())[2:]
+
+        for i in range(first_row, first_row + 3):
+            new_data[f'Column_{min(i - first_row, 2)}'] = [clearStr(v[i])
+                                                           if isinstance(v[i], str) else v[i] for v in orig_col_names]
+
+        new_data['Units']: list[str] = [''] * 3
+        for i in range(3):
+            #new_data['Column_2'][i], new_data['Units'][i] = new_data['Column_2'][i][:-5], new_data['Column_2'][i][-5:]
+            new_data['Units'][i] = new_data['Column_2'][i]
+        new_data['Units'] += [x[first_row + 2] for x in orig_col_names[3:]]
+
+        for c in ['Units', 'Column_0', 'Column_1']:
+            for i, el in enumerate(new_data[c]):
+                if isinstance(el, float) and (
+                        c != 'Column_1' or c == 'Column_1' and isinstance(new_data['Column_2'][i], str)):
+                    new_data[c][i] = new_data[c][i - 1]
+
+        del new_data['Column_2']
+
+        old_len = len(new_data[table_name])
+        for category in [table_name, sub_table_name]:
+            new_data[category] = [el for el in new_data[category] for _ in new_data['Units']]
+
+        for i in range(2):
+            new_data[f'Column_{i}'] *= old_len
+        new_data['Units'] *= old_len
+
+        for year, data in self._year_df_dict.items():  # data start from 6th row
+            new_data[year] = [cells[i] for i in range(6, self._last_row + 1) for cells in list(data.values())[2:]]
+
+        return new_data
+
 
 class TableCreation:
     """
@@ -138,7 +186,8 @@ class TableCreation:
                     processed_data = table.Table4Alpha()
 
                 case sheet if sheet[6] == '(' and sheet[-1] == ')':
-                    print(f'roman {sheet} not planned yet')
+                    #print(f'roman {sheet} not planned yet')
+                    processed_data = table.Table4Brackets()
 
                 case 'Table4.Gs1' | 'Table4.Gs2':
                     print(f'new {sheet} not planned yet')

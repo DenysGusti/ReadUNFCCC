@@ -28,7 +28,12 @@ class TimeSeries:
             new_data: dict[str | int, list] = {'Country_ISO': [x.name[:3] for x in self._countries_names]}
 
             # common name
-            for i, category in enumerate(['Category', 'Subcategory', 'Column_0', 'Column_1', 'Column_2', 'Units']):
+            category_number: int = len(list(tables.values())[0])
+            category_list5: str[5] = ['Category', 'Subcategory', 'Column_0', 'Column_1', 'Units']
+            category_list6: str[6] = ['Category', 'Subcategory', 'Column_0', 'Column_1', 'Column_2', 'Units']
+            category_list = category_list6 if category_number>5 else category_list5
+            #for i, category in enumerate(['Category', 'Subcategory', 'Column_0', 'Column_1', 'Column_2', 'Units']):
+            for i, category in enumerate(category_list):
                 new_data[category] = [''.join(t[0] for t in zip(*[v[i] for v in tables.values()])
                                               if t.count(t[0]) == len(t)).rstrip()
                                       if all(isinstance(v[i], str) for v in tables.values()) else nan
