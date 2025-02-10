@@ -24,7 +24,12 @@ class Patterns:
         # cutting the rows over the table
         min_row: int = min(row for row, cell in old_structure[name].items()
                            if row > 0 and isinstance(old_structure[name][row - 1], float) and isinstance(cell, str))
-        max_row: int = min(row - 2 for row, cell in old_structure[name].items() if str(cell)[:3] == '(1)')
+#        print(old_structure[name].items())
+#       for row, cell in old_structure[name].items():
+#            #if str(cell)[:3] == '(1)':
+#            print(str(cell)[:3])
+#            print(f"Row: {row}, Cell: {cell}")
+        max_row: int = min(row - 2 for row, cell in old_structure[name].items() if str(cell)[:3] == '(1)' or str(cell)[:5] == 'Note:')
         # in Gs2 there is additional info after (1)...!
 
         new_structure: dict[str, dict] = {k: {row: data for row, data in v.items() if min_row <= row <= max_row}
@@ -36,6 +41,7 @@ class Patterns:
         new_data: dict[str | int, list] = {}
 
         orig_row_names = list(self._structure[self._name].values())
+
         match self._name:
             case 'TABLE 4 SECTORAL REPORT FOR LAND USE, LAND-USE CHANGE AND FORESTRY':
                 table_name: str = f'{self._name}     {orig_row_names[0]}'
@@ -43,12 +49,22 @@ class Patterns:
             case 'Table 4.1  LAND TRANSITION MATRIX':
                 table_name: str = f'{self._name}     {orig_row_names[1]} {orig_row_names[0]}'
 
+            case 'TABLE 3 SECTORAL REPORT FOR AGRICULTURE':
+                table_name: str = f'{self._name}     {orig_row_names[0]}'
+
             case _:
                 table_name = ''
                 print('Unexpected table name')
 
         new_data[table_name] = [clearStr(x) for x in orig_row_names[2:]]
         first_row: int = list(self._structure[self._name].keys())[0]
+
+#        for el in new_data[table_name]:
+#            for v in list(self._structure.values())[1:]:
+#                print(v[first_row+1])
+#                print(clearStr(v[first_row+]))
+#                print("---")
+
         new_data['Column'] = [clearStr(v[first_row]) for v in list(self._structure.values())[1:]]
         old_len = len(new_data[table_name])
         new_data[table_name] = [el for el in new_data[table_name] for _ in new_data['Column']]
@@ -152,6 +168,108 @@ class Patterns:
         return new_data
 
 
+    def Table3Alpha(self) -> dict[str | int, list]:
+        new_data: dict[str | int, list] = {}
+
+        orig_row_names = list(self._structure[self._name].values())
+        table_name: str = f'{self._name}     {orig_row_names[0]} {orig_row_names[1]}'
+        #new_data[table_name] = [clearStr(x) if isinstance(x, str) else x for x in orig_row_names[5:]]
+        new_data[table_name] = [clearStr(x) if isinstance(x, str) else x for x in orig_row_names[3:]]
+
+        sub_name: str = list(self._structure.keys())[1]
+        orig_sub_names = list(self._structure[sub_name].values())
+        #sub_table_name: str = f'Subcategory     {orig_sub_names[1]}'
+        #new_data[sub_table_name] = [clearStr(x) if isinstance(x, str) else x for x in orig_sub_names[5:]]
+
+        first_row: int = list(self._structure[self._name].keys())[0]
+        #orig_col_names = list(self._structure.values())[2:]
+        orig_col_names = list(self._structure.values())[1:]
+
+        for i in range(first_row, first_row + 2):
+            new_data[f'Column_{min(i - first_row, 2)}'] = [clearStr(v[i])
+                                                           if isinstance(v[i], str) else v[i] for v in orig_col_names]
+
+#        new_data['Units']: list[str] = [''] * 3
+#        for i in range(3):
+#            new_data['Column_1'][i], new_data['Units'][i] = new_data['Column_1'][i][:-5], new_data['Column_1'][i][-5:]
+#            print(new_data['Column_1'][i])
+#            print(new_data['Column_1'][i][:-5])
+        #new_data['Units'] += [x[first_row + 2] for x in orig_col_names[3:]]
+        new_data['Units'] = [x[first_row + 2] for x in orig_col_names[0:]]
+
+        for c in ['Units', 'Column_0', 'Column_1']:
+            for i, el in enumerate(new_data[c]):
+                if isinstance(el, float) and (
+                        c != 'Column_1' or c == 'Column_1' and isinstance(new_data['Column_2'][i], str)):
+                    new_data[c][i] = new_data[c][i - 1]
+
+        old_len = len(new_data[table_name])
+#        for category in [table_name, sub_table_name]:
+#            new_data[category] = [el for el in new_data[category] for _ in new_data['Units']]
+
+        for i in range(2):
+            new_data[f'Column_{i}'] *= old_len
+        new_data['Units'] *= old_len
+
+        for year, data in self._year_df_dict.items():  # data start from 8th row
+            #new_data[year] = [cells[i] for i in range(8, self._last_row + 1) for cells in list(data.values())[2:]]
+            new_data[year] = [cells[i] for i in range(7, self._last_row + 1) for cells in list(data.values())[1:]]
+
+#        for k,v in new_data.items():
+#            print(f"{k}\n{v}\n{len(v)}")
+#        print(new_data)
+
+        new_data[list(new_data.keys())[0]] = [x for x in new_data[list(new_data.keys())[0]] for _ in range(5)]
+
+        return new_data
+
+
+    def Table3Beta(self) -> dict[str | int, list]:
+        new_data: dict[str | int, list] = {}
+
+        orig_row_names = list(self._structure[self._name].values())
+        table_name: str = f'{self._name}     {orig_row_names[0]} {orig_row_names[1]}'
+        #new_data[table_name] = [clearStr(x) if isinstance(x, str) else x for x in orig_row_names[5:]]
+        new_data[table_name] = [clearStr(x) if isinstance(x, str) else x for x in orig_row_names[4:]]
+
+        first_row: int = list(self._structure[self._name].keys())[0]
+        #orig_col_names = list(self._structure.values())[2:]
+        orig_col_names = list(self._structure.values())[1:]
+
+        for i in range(first_row, first_row + 4):
+            new_data[f'Column_{min(i - first_row, 3)}'] = [clearStr(v[i])
+                                                           if isinstance(v[i], str) else v[i] for v in orig_col_names]
+
+
+#        print(orig_col_names)
+#        print(orig_col_names[0][3])
+#        print(orig_col_names[0][6])
+#        print(orig_col_names[1][3])
+#        print(orig_col_names[1][4])
+
+        new_data['Units'] = new_data.pop('Column_3')
+        new_data['Units'][2] = new_data['Units'][1]
+        new_data['Units'][3] = new_data['Units'][1]
+
+        old_len = len(new_data[table_name])
+
+        for i in range(3):
+            new_data[f'Column_{i}'] *= old_len
+        new_data['Units'] *= old_len
+
+        for year, data in self._year_df_dict.items():  # data start from 8th row
+            # new_data[year] = [cells[i] for i in range(8, self._last_row + 1) for cells in list(data.values())[2:]]
+            new_data[year] = [cells[i] for i in range(7, self._last_row + 1) for cells in list(data.values())[1:]]
+
+           # for k,v in new_data.items():
+           #     print(f"{k}\n{v}\n{len(v)}")
+           # print(new_data)
+
+        new_data[list(new_data.keys())[0]] = [x for x in new_data[list(new_data.keys())[0]] for _ in range(9)]
+
+        return new_data
+
+
 class TableCreation:
     """
     making xlsx file
@@ -179,15 +297,21 @@ class TableCreation:
             successful: bool = True
 
             match sheet:
-                case 'Table4' | 'Table4.1':
+                case 'Table4' | 'Table4.1' | 'Table3s1':
                     processed_data = table.Table4Digit()
 
-                case sheet if sheet[-1].isalpha() and sheet[-1].isupper():
+                case sheet if (sheet[-1].isalpha() and sheet[-1].isupper()):
                     processed_data = table.Table4Alpha()
 
                 case sheet if sheet[6] == '(' and sheet[-1] == ')':
                     #print(f'roman {sheet} not planned yet')
                     processed_data = table.Table4Brackets()
+
+                case 'Table3.As1':
+                    processed_data = table.Table3Alpha()
+
+                case 'Table3.B(a)s1':
+                    processed_data = table.Table3Beta()
 
                 case 'Table4.Gs1' | 'Table4.Gs2':
                     print(f'new {sheet} not planned yet')
