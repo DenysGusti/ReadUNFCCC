@@ -1,4 +1,6 @@
 import pandas as pd
+import numpy as np
+import copy
 
 import openpyxl
 
@@ -9,7 +11,7 @@ from auxiliary_functions import calculateTime, writeFile, clearStr
 
 class Patterns:
     """
-    Different processing for every xlsx sheet type (i.e. CRF table type)
+    Different processing for every xlsx sheet type (i.e. CRT table type)
     """
 
     def __init__(self, year_df_dict: dict[int, dict[str, dict]]):
@@ -19,26 +21,34 @@ class Patterns:
     def getInfo(self) -> tuple[str, int, dict[str, dict]]:
         first_year: int = min(self._year_df_dict.keys())
         old_structure: dict[str, dict] = self._year_df_dict[first_year]
-        name: str = list(old_structure.keys())[0]
+        name: str = list(old_structure.keys())[1]
 
         # cutting the rows over the table
         min_row: int = min(row for row, cell in old_structure[name].items()
                            if row > 0 and isinstance(old_structure[name][row - 1], float) and isinstance(cell, str))
+        min_row = min_row+1 # remove 'Back to index'
 #        print(old_structure[name].items())
 #       for row, cell in old_structure[name].items():
 #            #if str(cell)[:3] == '(1)':
 #            print(str(cell)[:3])
 #            print(f"Row: {row}, Cell: {cell}")
-        max_row: int = min(row - 2 for row, cell in old_structure[name].items() if str(cell)[:3] == '(1)' or str(cell)[:5] == 'Note:')
+        max_row: int = min(row - 1 for row, cell in old_structure[name].items() if str(cell)[:3] == '(1)' or str(cell)[:5] == 'Note:')
+
         # in Gs2 there is additional info after (1)...!
 
         new_structure: dict[str, dict] = {k: {row: data for row, data in v.items() if min_row <= row <= max_row}
                                           for k, v in old_structure.items()}
+        # Remove the first key-value pair
+        first_key = next(iter(new_structure))  # Get the first key
+        new_structure.pop(first_key)  # Remove it
 
+        #print(new_structure)
         return name, max_row, new_structure
 
     def Table4Digit(self) -> dict[str | int, list]:
         new_data: dict[str | int, list] = {}
+
+        #deep_copy = copy.deepcopy(new_structure)
 
         orig_row_names = list(self._structure[self._name].values())
 
@@ -73,8 +83,9 @@ class Patterns:
         new_data['Column'] *= old_len
         new_data['Units'] = [units] * len(new_data['Column'])
 
-        for year, data in self._year_df_dict.items():  # data start from 5th row
-            new_data[year] = [cells[i] for i in range(5, self._last_row + 1) for cells in list(data.values())[1:]]
+        for year, data in self._year_df_dict.items():  # data start from 8th row
+            #new_data[year] = [cells[i] for i in range(5, self._last_row + 1) for cells in list(data.values())[1:]]
+            new_data[year] = [cells[i] for i in range(8, self._last_row + 1) for cells in list(data.values())[2:]]
 
         return new_data
 
@@ -83,24 +94,36 @@ class Patterns:
 
         orig_row_names = list(self._structure[self._name].values())
         table_name: str = f'{self._name}     {orig_row_names[0]} {orig_row_names[1]}'
-        new_data[table_name] = [clearStr(x) if isinstance(x, str) else x for x in orig_row_names[5:]]
+        new_data[table_name] = [clearStr(x) if isinstance(x, str) else x for x in orig_row_names[4:]]
 
         sub_name: str = list(self._structure.keys())[1]
         orig_sub_names = list(self._structure[sub_name].values())
         sub_table_name: str = f'Subcategory     {orig_sub_names[1]}'
-        new_data[sub_table_name] = [clearStr(x) if isinstance(x, str) else x for x in orig_sub_names[5:]]
+        new_data[sub_table_name] = [clearStr(x) if isinstance(x, str) else x for x in orig_sub_names[4:]]
 
         first_row: int = list(self._structure[self._name].keys())[0]
         orig_col_names = list(self._structure.values())[2:]
+        del orig_col_names[-2:]  # Deletes the last 2 elements / the empty column and the "Additional information"
 
         for i in range(first_row, first_row + 4):
-            new_data[f'Column_{min(i - first_row, 2)}'] = [clearStr(v[i])
+        #for i in range(first_row, first_row + 3):
+            new_data[f'Column_{min(i - first_row, 3)}'] = [clearStr(v[i])
                                                            if isinstance(v[i], str) else v[i] for v in orig_col_names]
 
-        new_data['Units']: list[str] = [''] * 3
-        for i in range(3):
-            new_data['Column_1'][i], new_data['Units'][i] = new_data['Column_1'][i][:-5], new_data['Column_1'][i][-5:]
-        new_data['Units'] += [x[first_row + 4] for x in orig_col_names[3:]]
+        units_size: int = len(list(new_data['Column_3']))
+        #new_data['Units']: list[str] = [''] * 3
+        new_data['Units']: list[str] = [''] * units_size
+        for i in range(units_size):
+            #new_data['Column_1'][i], new_data['Units'][i] = new_data['Column_1'][i][:-5], new_data['Column_1'][i][-5:]
+            new_data['Units'][i] = new_data['Column_3'][i]
+        previous = None
+        for i in range(units_size):
+            if isinstance(new_data['Units'][i], float) and np.isnan(new_data['Units'][i]):  # Check if it's NaN
+                new_data['Units'][i] = previous
+            else:
+                previous = new_data['Units'][i]  # Update previous non-NaN value
+
+        del new_data['Column_3'] # it was a temporary column for selecting units
 
         for c in ['Units', 'Column_0', 'Column_1']:
             for i, el in enumerate(new_data[c]):
@@ -117,7 +140,8 @@ class Patterns:
         new_data['Units'] *= old_len
 
         for year, data in self._year_df_dict.items():  # data start from 8th row
-            new_data[year] = [cells[i] for i in range(8, self._last_row + 1) for cells in list(data.values())[2:]]
+            #new_data[year] = [cells[i] for i in range(8, self._last_row + 1) for cells in list(data.values())[2:]]
+            new_data[year] = [cells[i] for i in range(8, self._last_row + 1) for cells in list(data.values())[3:-2]] # #3:-2 to cut off additional information (ignoring at the moment)
 
         return new_data
 
@@ -146,6 +170,14 @@ class Patterns:
             new_data['Units'][i] = new_data['Column_2'][i]
         new_data['Units'] += [x[first_row + 2] for x in orig_col_names[3:]]
 
+        units_size: int = len(list(new_data['Column_2']))
+        previous = None
+        for i in range(units_size):
+            if isinstance(new_data['Units'][i], float) and np.isnan(new_data['Units'][i]):  # Check if it's NaN
+                new_data['Units'][i] = previous
+            else:
+                previous = new_data['Units'][i]  # Update previous non-NaN value
+
         for c in ['Units', 'Column_0', 'Column_1']:
             for i, el in enumerate(new_data[c]):
                 if isinstance(el, float) and (
@@ -162,8 +194,8 @@ class Patterns:
             new_data[f'Column_{i}'] *= old_len
         new_data['Units'] *= old_len
 
-        for year, data in self._year_df_dict.items():  # data start from 6th row
-            new_data[year] = [cells[i] for i in range(6, self._last_row + 1) for cells in list(data.values())[2:]]
+        for year, data in self._year_df_dict.items():  # data start from 8th row
+            new_data[year] = [cells[i] for i in range(8, self._last_row + 1) for cells in list(data.values())[3:]]
 
         return new_data
 
@@ -183,7 +215,8 @@ class Patterns:
 
         first_row: int = list(self._structure[self._name].keys())[0]
         #orig_col_names = list(self._structure.values())[2:]
-        orig_col_names = list(self._structure.values())[1:]
+        #orig_col_names = list(self._structure.values())[1:]
+        orig_col_names = list(self._structure.values())[1:6] # #1:6 to cut off additional information (ignoring at the moment)
 
         for i in range(first_row, first_row + 2):
             new_data[f'Column_{min(i - first_row, 2)}'] = [clearStr(v[i])
@@ -213,7 +246,7 @@ class Patterns:
 
         for year, data in self._year_df_dict.items():  # data start from 8th row
             #new_data[year] = [cells[i] for i in range(8, self._last_row + 1) for cells in list(data.values())[2:]]
-            new_data[year] = [cells[i] for i in range(7, self._last_row + 1) for cells in list(data.values())[1:]]
+            new_data[year] = [cells[i] for i in range(8, self._last_row + 1) for cells in list(data.values())[2:7]] # 2:7 to cut off additional information (ignoring at the moment)
 
 #        for k,v in new_data.items():
 #            print(f"{k}\n{v}\n{len(v)}")
@@ -234,7 +267,7 @@ class Patterns:
 
         first_row: int = list(self._structure[self._name].keys())[0]
         #orig_col_names = list(self._structure.values())[2:]
-        orig_col_names = list(self._structure.values())[1:]
+        orig_col_names = list(self._structure.values())[1:10] #1:10 to cut off additional information (ignoring at the moment)
 
         for i in range(first_row, first_row + 4):
             new_data[f'Column_{min(i - first_row, 3)}'] = [clearStr(v[i])
@@ -257,9 +290,8 @@ class Patterns:
             new_data[f'Column_{i}'] *= old_len
         new_data['Units'] *= old_len
 
-        for year, data in self._year_df_dict.items():  # data start from 8th row
-            # new_data[year] = [cells[i] for i in range(8, self._last_row + 1) for cells in list(data.values())[2:]]
-            new_data[year] = [cells[i] for i in range(7, self._last_row + 1) for cells in list(data.values())[1:]]
+        for year, data in self._year_df_dict.items():  # data start from 8th row / 11th row - additional information (ignoring at the moment)
+            new_data[year] = [cells[i] for i in range(8, self._last_row + 1) for cells in list(data.values())[2:11]]
 
            # for k,v in new_data.items():
            #     print(f"{k}\n{v}\n{len(v)}")
@@ -283,7 +315,7 @@ class TableCreation:
         writeFile(destination=country_destination, sheet_df_dict=self.createDataDict())
 
     def getYearTableDict(self, sheet_name: str) -> dict[int, dict]:
-        return {int(file_path.name[9:13]): pd.read_excel(file_path, sheet_name=sheet_name, engine='openpyxl').to_dict()
+        return {int(file_path.name[18:22]): pd.read_excel(file_path, sheet_name=sheet_name, engine='openpyxl').to_dict()
                 for file_path in self._country_sources}
 
     @calculateTime
@@ -297,20 +329,21 @@ class TableCreation:
             successful: bool = True
 
             match sheet:
-                case 'Table4' | 'Table4.1' | 'Table3s1':
+                case 'Table4' | 'Table4.1' | 'Table3':
                     processed_data = table.Table4Digit()
 
-                case sheet if (sheet[-1].isalpha() and sheet[-1].isupper()):
+                #case sheet if (sheet[-1].isalpha() and sheet[-1].isupper()):
+                case sheet if (sheet[-3] =='4' and sheet[-1].isalpha() and sheet[-1].isupper()):
                     processed_data = table.Table4Alpha()
 
                 case sheet if sheet[6] == '(' and sheet[-1] == ')':
                     #print(f'roman {sheet} not planned yet')
                     processed_data = table.Table4Brackets()
 
-                case 'Table3.As1':
+                case 'Table3.A':
                     processed_data = table.Table3Alpha()
 
-                case 'Table3.B(a)s1':
+                case 'Table3.B(a)':
                     processed_data = table.Table3Beta()
 
                 case 'Table4.Gs1' | 'Table4.Gs2':

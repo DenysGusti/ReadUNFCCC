@@ -1,5 +1,5 @@
-#from settings import *
-from settings_Table3 import *
+from settings import *
+#from settings_Table3 import *
 from data_extraction import TableCreation
 from time_series import TimeSeries
 from auxiliary_functions import calculateTime

@@ -4,26 +4,31 @@ from math import nan
 '''
 If you want to extract data from the original CRF tables submitted to the UNFCCC set this parameter to TRUE
 '''
-EXTRACT_DATA: bool = False
+EXTRACT_DATA: bool = True
 
 '''
 Specify the path where do you keep the downloaded CRF tables (the files for every country should be in a separate
 folder named as the country ISO3 code is, e.g. aus, aut...)
 '''
-DATA_PATH: Path = Path(r'D:\MGusti\CurrentWork\UNFCCC_script\data\2023')
+#DATA_PATH: Path = Path(r'D:\MGusti\CurrentWork\UNFCCC_script\data\2023')
+DATA_PATH: Path = Path(r'D:\MGusti\CurrentWork\UNFCCC_script\data\2025')
 
 '''
 Specify the CRF tables you want to extract
 '''
-SHEETS_LIST: list[str] = ['Table4', 'Table4.1', 'Table4.A', 'Table4.B', 'Table4.C', 'Table4.D', 'Table4.E', 'Table4.F','Table4(II)']
-# SHEETS_LIST: list[str] = ['Table4']
-
+SHEETS_LIST: list[str] = ['Table3','Table3.A', 'Table3.B(a)','Table4', 'Table4.1', 'Table4.A', 'Table4.B', 'Table4.C', 'Table4.D', 'Table4.E', 'Table4.F','Table4(II)']
+#SHEETS_LIST: list[str] = ['Table4', 'Table4.1']
+#SHEETS_LIST: list[str] = ['Table4.A', 'Table4.B', 'Table4.C', 'Table4.D', 'Table4.E', 'Table4.F']
+#SHEETS_LIST: list[str] = ['Table4(II)']
+#SHEETS_LIST: list[str] = ['Table3']
+#SHEETS_LIST: list[str] = ['Table3.A']
+#SHEETS_LIST: list[str] = ['Table3.B(a)']
 '''
 Specify a range of years or single years for which you want to extract the data
 '''
-YEARS: list[int] = list(range(1990, 2022))
+#YEARS: list[int] = list(range(1990, 2022))
 #YEARS: list[int] = [1990, 1991, 1992]
-
+YEARS: list[int] = [2023]
 '''
 Specify the folder name where you out the original CRF tables extracted from the archives
 '''
@@ -37,7 +42,7 @@ countries (see example in the second line)
 
 COUNTRIES_DICT: dict[Path, list[Path]] = {
     DATA_PATH / 'extracted' / f"{country.name[:8].replace('-', '_')}.xlsx":
-        [x for x in country.glob('**/*.xlsx') if '~$' not in x.name and int(x.name[9:13]) in YEARS]
+        [x for x in country.glob('**/*.xlsx') if '~$' not in x.name and int(x.name[18:22]) in YEARS]
     for country in COUNTRIES_LIST
 }
 
@@ -47,7 +52,7 @@ COUNTRIES_DICT: dict[Path, list[Path]] = {
 If you want to create a timeseries of one or a few parameters from the extracted data then set CREATE_TIME_SERIES to
 TRUE
 '''
-CREATE_TIME_SERIES: bool = True
+CREATE_TIME_SERIES: bool = False
 
 '''
 Specify the parameter (user) names (e.g. Deforestation) and CRF table categories from which the parameters will be 
