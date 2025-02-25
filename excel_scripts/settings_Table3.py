@@ -10,24 +10,22 @@ EXTRACT_DATA: bool = True
 Specify the path where do you keep the downloaded CRF tables (the files for every country should be in a separate
 folder named as the country ISO3 code is, e.g. aus, aut...)
 '''
-DATA_PATH: Path = Path(r'D:\MGusti\CurrentWork\UNFCCC_script\data\2023')
-
+#DATA_PATH: Path = Path(r'D:\MGusti\CurrentWork\UNFCCC_script\data\2023')
+DATA_PATH: Path = Path(r'D:\MGusti\CurrentWork\UNFCCC_script\data\2025')
 '''
 Specify the CRF tables you want to extract
 '''
-#SHEETS_LIST: list[str] = ['Table3s1', 'Table3.As1', 'Table3.B(a)s1', 'Table3.B(b)']
-#SHEETS_LIST: list[str] = ['Table3s1']
-#SHEETS_LIST: list[str] = ['Table3.As1']
-SHEETS_LIST: list[str] = ['Table3.B(a)s1']
-#SHEETS_LIST: list[str] = ['Table4']
-#SHEETS_LIST: list[str] = ['Table4.A']
+SHEETS_LIST: list[str] = ['Table3','Table3.A', 'Table3.B(a)']
+#SHEETS_LIST: list[str] = ['Table3']
+#SHEETS_LIST: list[str] = ['Table3.A']
+#SHEETS_LIST: list[str] = ['Table3.B(a)']
 
 '''
 Specify a range of years or single years for which you want to extract the data
 '''
-YEARS: list[int] = list(range(1990, 2022))
+#YEARS: list[int] = list(range(1990, 2022))
 #YEARS: list[int] = [1990, 1991, 1992]
-
+YEARS: list[int] = [2023]
 '''
 Specify the folder name where you out the original CRF tables extracted from the archives
 '''

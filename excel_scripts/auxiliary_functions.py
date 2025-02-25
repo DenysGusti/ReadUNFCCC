@@ -26,7 +26,10 @@ def writeFile(destination: Path, sheet_df_dict: dict[str, pd.DataFrame]) -> None
 
 
 def clearStr(str_in: str) -> str:
-    str_out = str_in.replace('\n', '')
-    for i in range(1, 10):
-        str_out = str_out.replace(f'({i})', '')
-    return str_out.rstrip(' .,')
+    if isinstance(str_in, str):
+        str_out = str_in.replace('\n', '')
+        for i in range(1, 10):
+            str_out = str_out.replace(f'({i})', '')
+        return str_out.rstrip(' .,')
+    else:
+        return "None"
