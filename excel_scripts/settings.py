@@ -4,7 +4,7 @@ from math import nan
 '''
 If you want to extract data from the original CRF tables submitted to the UNFCCC set this parameter to TRUE
 '''
-EXTRACT_DATA: bool = True
+EXTRACT_DATA: bool = False
 
 '''
 Specify the path where do you keep the downloaded CRF tables (the files for every country should be in a separate
@@ -26,9 +26,9 @@ SHEETS_LIST: list[str] = ['Table3','Table3.A', 'Table3.B(a)','Table4', 'Table4.1
 '''
 Specify a range of years or single years for which you want to extract the data
 '''
-#YEARS: list[int] = list(range(1990, 2022))
+YEARS: list[int] = list(range(1990, 2024))
 #YEARS: list[int] = [1990, 1991, 1992]
-YEARS: list[int] = [2023]
+#YEARS: list[int] = [2023]
 '''
 Specify the folder name where you out the original CRF tables extracted from the archives
 '''
@@ -39,6 +39,7 @@ countries (see example in the second line)
 '''
 # COUNTRIES_LIST: list[Path] = [x for x in COUNTRIES_LIST if x.name[:3] in ['svk' or 'svn' or 'swe' or 'tur' or 'ukr' or 'usa']]
 #COUNTRIES_LIST: list[Path] = [x for x in COUNTRIES_LIST if x.name[:3] in ['deu']]
+COUNTRIES_LIST: list[Path] = [x for x in COUNTRIES_LIST if x.name[:3] in ['irl']]
 
 COUNTRIES_DICT: dict[Path, list[Path]] = {
     DATA_PATH / 'extracted' / f"{country.name[:8].replace('-', '_')}.xlsx":
@@ -52,7 +53,7 @@ COUNTRIES_DICT: dict[Path, list[Path]] = {
 If you want to create a timeseries of one or a few parameters from the extracted data then set CREATE_TIME_SERIES to
 TRUE
 '''
-CREATE_TIME_SERIES: bool = False
+CREATE_TIME_SERIES: bool = True
 
 '''
 Specify the parameter (user) names (e.g. Deforestation) and CRF table categories from which the parameters will be 
@@ -62,6 +63,17 @@ unit to uniquely identify the data. If one of the subcategory in the CRF table i
 '''
 
 PARAMETERS: dict[str, dict[str, list[str | float]]] = {  # if the field is empty, fill it with nan
+
+    'Total_LULUCF_emissions_kt': { #(1) For the purposes of reporting, the signs for removals are always negative (–) for removals and positive (+) for emissions.
+        'Table4': ['Total LULUCF', 'Total GHG', '(kt)']
+    },
+
+    'Total_Forest_land_emissions_kt': { #(1) For the purposes of reporting, the signs for removals are always negative (–) for removals and positive (+) for emissions.
+        'Table4': ['A. Forest land', 'Total GHG', '(kt)']
+    },
+    'Total_FF_LFL_emissions_kt': { #(1) For the purposes of reporting, the signs for removals are always negative (–) for removals and positive (+) for emissions.
+        'Table4': ['A.1. Forest land remaining forest land', 'Total GHG', '(kt)']
+    },
     'Total_Forest_land_area': {
         'Table4.A': ['A. Total forest land', nan, 'ACTIVITY DATA', 'Total area', nan, '(kha)']
     },
@@ -98,237 +110,207 @@ PARAMETERS: dict[str, dict[str, list[str | float]]] = {  # if the field is empty
 
      ,
      'Net Bm (t C per ha)_FLFL': {  # '/', ':' invalid
-         'Table4.A': ['1. Forest land remaining forest land', nan, 'IMPLIED CARBON-STOCK-CHANGE FACTORS',
+         'Table4.A': ['1. Forest land remaining forest land', nan, 'IMPLIED CARBON STOCK CHANGE FACTORS',
                       'Carbon stock change in living biomass per area', 'Net change', '(t C/ha)']
      },
      'Net Bm (kt C)_FLFL': {
-         'Table4.A': ['1. Forest land remaining forest land', nan,'CHANGES IN CARBON STOCK AND NET CO2 EMISSIONS/REMOVALS FROM SOILS',
+         'Table4.A': ['1. Forest land remaining forest land', nan,'CARBON STOCK CHANGES',
                         'Carbon stock change in living biomass', 'Net change', '(kt C)']
      },
 
      'Net Bm (t C per ha)_LFL': {  # '/', ':' invalid
-         'Table4.A': ['2. Land converted to forest land', nan, 'IMPLIED CARBON-STOCK-CHANGE FACTORS',
+         'Table4.A': ['2. Land converted to forest land', nan, 'IMPLIED CARBON STOCK CHANGE FACTORS',
                       'Carbon stock change in living biomass per area', 'Net change', '(t C/ha)']
      },
      'Net Bm (kt C)_LFL': {
          'Table4.A': ['2. Land converted to forest land', nan,
-                      'CHANGES IN CARBON STOCK AND NET CO2 EMISSIONS/REMOVALS FROM SOILS',
+                      'CARBON STOCK CHANGES',
                       'Carbon stock change in living biomass', 'Net change', '(kt C)']
      },
 
-     'Net BM_(t C per ha)_FL-L': {
-         'Table4.B': ['Forest land converted to', nan, 'IMPLIED CARBON-STOCK-CHANGE FACTORS', 'Carbon stock change in living biomass per area', 'Net change', '(t C/ha)'],
-         'Table4.C': ['Forest land converted to', nan, 'IMPLIED CARBON-STOCK-CHANGE FACTORS', 'Carbon stock change in living biomass per area', 'Net change', '(t C/ha)'],
-         'Table4.D': ['Forest land converted to', nan, 'IMPLIED CARBON-STOCK-CHANGE FACTORS', 'Carbon stock change in living biomass per area', 'Net change', '(t C/ha)'],
-         'Table4.E': ['Forest land converted to', nan, 'IMPLIED CARBON-STOCK-CHANGE FACTORS', 'Carbon stock change in living biomass per area', 'Net change', '(t C/ha)'],
-         'Table4.F': ['Forest land converted to', nan, 'IMPLIED CARBON-STOCK-CHANGE FACTORS', 'Carbon stock change in living biomass per area', 'Net change', '(t C/ha)']
+     'Net BM_(t C per ha)_FL-L': { # Not area-weighted ! Just an indication!
+         'Table4.B': ['Forest land converted to', nan, 'IMPLIED CARBON STOCK CHANGE FACTORS', 'Carbon stock change in living biomass per area', 'Net change', '(t C/ha)'],
+         'Table4.C': ['Forest land converted to', nan, 'IMPLIED CARBON STOCK CHANGE FACTORS', 'Carbon stock change in living biomass per area', 'Net change', '(t C/ha)'],
+         'Table4.D': ['Forest land converted to', nan, 'IMPLIED CARBON STOCK CHANGE FACTORS', 'Carbon stock change in living biomass per area', 'Net change', '(t C/ha)'],
+         'Table4.E': ['Forest land converted to', nan, 'IMPLIED CARBON STOCK CHANGE FACTORS', 'Carbon stock change in living biomass per area', 'Net change', '(t C/ha)'],
+         'Table4.F': ['Forest land converted to', nan, 'IMPLIED CARBON STOCK CHANGE FACTORS', 'Carbon stock change in living biomass per area', 'Net change', '(t C/ha)']
      },
      'Net BM_(kt C)_FL-L': {
-         'Table4.B': ['Forest land converted to', nan, 'CHANGES IN CARBON STOCK AND NET CO2 EMISSIONS/REMOVALS FROM SOILS',
+         'Table4.B': ['Forest land converted to', nan, 'CARBON STOCK CHANGES',
                       'Carbon stock change in living biomass', 'Net change', '(kt C)'],
-         'Table4.C': ['Forest land converted to', nan, 'CHANGES IN CARBON STOCK AND NET CO2 EMISSIONS/REMOVALS FROM SOILS',
+         'Table4.C': ['Forest land converted to', nan, 'CARBON STOCK CHANGES',
                       'Carbon stock change in living biomass', 'Net change', '(kt C)'],
-         'Table4.D': ['Forest land converted to', nan, 'CHANGES IN CARBON STOCK AND NET CO2 EMISSIONS/REMOVALS FROM SOILS',
+         'Table4.D': ['Forest land converted to', nan, 'CARBON STOCK CHANGES',
                       'Carbon stock change in living biomass', 'Net change', '(kt C)'],
-         'Table4.E': ['Forest land converted to', nan, 'CHANGES IN CARBON STOCK AND NET CO2 EMISSIONS/REMOVALS FROM SOILS',
+         'Table4.E': ['Forest land converted to', nan, 'CARBON STOCK CHANGES',
                       'Carbon stock change in living biomass', 'Net change', '(kt C)'],
-         'Table4.F': ['Forest land converted to', nan, 'CHANGES IN CARBON STOCK AND NET CO2 EMISSIONS/REMOVALS FROM SOILS',
+         'Table4.F': ['Forest land converted to', nan, 'CARBON STOCK CHANGES',
                       'Carbon stock change in living biomass', 'Net change', '(kt C)']
      },
 
      'Net DW (t C per ha)_FLFL': {  # '/', ':' invalid
-         'Table4.A': ['1. Forest land remaining forest land', nan, 'IMPLIED CARBON-STOCK-CHANGE FACTORS',
+         'Table4.A': ['1. Forest land remaining forest land', nan, 'IMPLIED CARBON STOCK CHANGE FACTORS',
                       'Net carbon stock change in dead wood per area', nan, '(t C/ha)']
      },
      'Net DW (kt C)_FLFL': {
          'Table4.A': ['1. Forest land remaining forest land', nan,
-                      'CHANGES IN CARBON STOCK AND NET CO2 EMISSIONS/REMOVALS FROM SOILS',
+                      'CARBON STOCK CHANGES',
                       'Net carbon stock change in dead wood', nan, '(kt C)']
      },
 
      'Net DW (t C per ha)_LFL': {  # '/', ':' invalid
-         'Table4.A': ['2. Land converted to forest land', nan, 'IMPLIED CARBON-STOCK-CHANGE FACTORS',
+         'Table4.A': ['2. Land converted to forest land', nan, 'IMPLIED CARBON STOCK CHANGE FACTORS',
                       'Net carbon stock change in dead wood per area', nan, '(t C/ha)']
      },
      'Net DW (kt C)_LFL': {
          'Table4.A': ['2. Land converted to forest land', nan,
-                      'CHANGES IN CARBON STOCK AND NET CO2 EMISSIONS/REMOVALS FROM SOILS',
+                      'CARBON STOCK CHANGES',
                       'Net carbon stock change in dead wood', nan, '(kt C)']
      },
 
-     'Net DW_(t C per ha)_FL-L': {
-         'Table4.B': ['Forest land converted to', nan, 'IMPLIED CARBON-STOCK-CHANGE FACTORS',
+     'Net DW_(t C per ha)_FL-L': { # Not area-weighted ! Just an indication!
+         'Table4.B': ['Forest land converted to', nan, 'IMPLIED CARBON STOCK CHANGE FACTORS',
                       'Net carbon stock change in dead organic matter per area', 'Net change', '(t C/ha)'],
-         'Table4.C': ['Forest land converted to', nan, 'IMPLIED CARBON-STOCK-CHANGE FACTORS',
+         'Table4.C': ['Forest land converted to', nan, 'IMPLIED CARBON STOCK CHANGE FACTORS',
                       'Net carbon stock change in dead organic matter per area', 'Net change', '(t C/ha)'],
-         'Table4.D': ['Forest land converted to', nan, 'IMPLIED CARBON-STOCK-CHANGE FACTORS',
+         'Table4.D': ['Forest land converted to', nan, 'IMPLIED CARBON STOCK CHANGE FACTORS',
                       'Net carbon stock change in dead organic matter per area', 'Net change', '(t C/ha)'],
-         'Table4.E': ['Forest land converted to', nan, 'IMPLIED CARBON-STOCK-CHANGE FACTORS',
+         'Table4.E': ['Forest land converted to', nan, 'IMPLIED CARBON STOCK CHANGE FACTORS',
                       'Net carbon stock change in dead organic matter per area', 'Net change', '(t C/ha)'],
-         'Table4.F': ['Forest land converted to', nan, 'IMPLIED CARBON-STOCK-CHANGE FACTORS',
+         'Table4.F': ['Forest land converted to', nan, 'IMPLIED CARBON STOCK CHANGE FACTORS',
                       'Net carbon stock change in dead organic matter per area', 'Net change', '(t C/ha)']
      },
      'Net DW_(kt C)_FL-L': {
          'Table4.B': ['Forest land converted to', nan,
-                      'CHANGES IN CARBON STOCK AND NET CO2 EMISSIONS/REMOVALS FROM SOILS',
+                      'CARBON STOCK CHANGES',
                       'Net carbon stock change in dead organic matter', nan, '(kt C)'],
          'Table4.C': ['Forest land converted to', nan,
-                      'CHANGES IN CARBON STOCK AND NET CO2 EMISSIONS/REMOVALS FROM SOILS',
+                      'CARBON STOCK CHANGES',
                       'Net carbon stock change in dead organic matter', nan, '(kt C)'],
          'Table4.D': ['Forest land converted to', nan,
-                      'CHANGES IN CARBON STOCK AND NET CO2 EMISSIONS/REMOVALS FROM SOILS',
+                      'CARBON STOCK CHANGES',
                       'Net carbon stock change in dead organic matter', nan, '(kt C)'],
          'Table4.E': ['Forest land converted to', nan,
-                      'CHANGES IN CARBON STOCK AND NET CO2 EMISSIONS/REMOVALS FROM SOILS',
+                      'CARBON STOCK CHANGES',
                       'Net carbon stock change in dead organic matter', nan, '(kt C)'],
          'Table4.F': ['Forest land converted to', nan,
-                      'CHANGES IN CARBON STOCK AND NET CO2 EMISSIONS/REMOVALS FROM SOILS',
+                      'CARBON STOCK CHANGES',
                       'Net carbon stock change in dead organic matter', nan, '(kt C)']
      },
 
      'Net Litter (t C per ha)_FLFL': {  # '/', ':' invalid
-         'Table4.A': ['1. Forest land remaining forest land', nan, 'IMPLIED CARBON-STOCK-CHANGE FACTORS',
-                      'Net carbon stock change in litter per area', nan, '(t C/ha)']
+         'Table4.A': ['1. Forest land remaining forest land', nan, 'IMPLIED CARBON STOCK CHANGE FACTORS',
+                      'Net carbon stock change in litter  per area', nan, '(t C/ha)']
      },
      'Net Litter (kt C)_FLFL': {
          'Table4.A': ['1. Forest land remaining forest land', nan,
-                      'CHANGES IN CARBON STOCK AND NET CO2 EMISSIONS/REMOVALS FROM SOILS',
+                      'CARBON STOCK CHANGES',
                       'Net carbon stock change in litter', nan, '(kt C)']
      },
 
      'Net Litter (t C per ha)_LFL': {  # '/', ':' invalid
-         'Table4.A': ['2. Land converted to forest land', nan, 'IMPLIED CARBON-STOCK-CHANGE FACTORS',
-                      'Net carbon stock change in litter per area', nan, '(t C/ha)']
+         'Table4.A': ['2. Land converted to forest land', nan, 'IMPLIED CARBON STOCK CHANGE FACTORS',
+                      'Net carbon stock change in litter  per area', nan, '(t C/ha)']
      },
      'Net Litter (kt C)_LFL': {
          'Table4.A': ['2. Land converted to forest land', nan,
-                      'CHANGES IN CARBON STOCK AND NET CO2 EMISSIONS/REMOVALS FROM SOILS',
-                      'Net carbon stock change in litter', nan, '(kt C)']
-     },
-
-     'Net Litter_(t C per ha)_FL-L': {
-         'Table4.B': ['Forest land converted to', nan, 'IMPLIED CARBON-STOCK-CHANGE FACTORS',
-                      'Net carbon stock change in litter per area', 'Net change', '(t C/ha)'],
-         'Table4.C': ['Forest land converted to', nan, 'IMPLIED CARBON-STOCK-CHANGE FACTORS',
-                      'Net carbon stock change in litter per area', 'Net change', '(t C/ha)'],
-         'Table4.D': ['Forest land converted to', nan, 'IMPLIED CARBON-STOCK-CHANGE FACTORS',
-                      'Net carbon stock change in litter per area', 'Net change', '(t C/ha)'],
-         'Table4.E': ['Forest land converted to', nan, 'IMPLIED CARBON-STOCK-CHANGE FACTORS',
-                      'Net carbon stock change in litter per area', 'Net change', '(t C/ha)'],
-         'Table4.F': ['Forest land converted to', nan, 'IMPLIED CARBON-STOCK-CHANGE FACTORS',
-                      'Net carbon stock change in litter per area', 'Net change', '(t C/ha)']
-     },
-     'Net Litter_(kt C)_FL-L': {
-         'Table4.B': ['Forest land converted to', nan,
-                      'CHANGES IN CARBON STOCK AND NET CO2 EMISSIONS/REMOVALS FROM SOILS',
-                      'Net carbon stock change in litter', nan, '(kt C)'],
-         'Table4.C': ['Forest land converted to', nan,
-                      'CHANGES IN CARBON STOCK AND NET CO2 EMISSIONS/REMOVALS FROM SOILS',
-                      'Net carbon stock change in litter', nan, '(kt C)'],
-         'Table4.D': ['Forest land converted to', nan,
-                      'CHANGES IN CARBON STOCK AND NET CO2 EMISSIONS/REMOVALS FROM SOILS',
-                      'Net carbon stock change in litter', nan, '(kt C)'],
-         'Table4.E': ['Forest land converted to', nan,
-                      'CHANGES IN CARBON STOCK AND NET CO2 EMISSIONS/REMOVALS FROM SOILS',
-                      'Net carbon stock change in litter', nan, '(kt C)'],
-         'Table4.F': ['Forest land converted to', nan,
-                      'CHANGES IN CARBON STOCK AND NET CO2 EMISSIONS/REMOVALS FROM SOILS',
+                      'CARBON STOCK CHANGES',
                       'Net carbon stock change in litter', nan, '(kt C)']
      },
 
      'Soil_mineral (t C per ha)_FLFL': {  # '/', ':' invalid
-         'Table4.A': ['1. Forest land remaining forest land', nan, 'IMPLIED CARBON-STOCK-CHANGE FACTORS',
+         'Table4.A': ['1. Forest land remaining forest land', nan, 'IMPLIED CARBON STOCK CHANGE FACTORS',
                       'Net carbon stock change in soils per area', 'Mineral soils', '(t C/ha)']
      },
      'Soil_organic (t C per ha)_FLFL': {  # '/', ':' invalid
-         'Table4.A': ['1. Forest land remaining forest land', nan, 'IMPLIED CARBON-STOCK-CHANGE FACTORS',
+         'Table4.A': ['1. Forest land remaining forest land', nan, 'IMPLIED CARBON STOCK CHANGE FACTORS',
                       'Net carbon stock change in soils per area', 'Organic soils', '(t C/ha)']
      },
 
      'Soil (kt C)_mineral_FLFL': {
          'Table4.A': ['1. Forest land remaining forest land', nan,
-                      'CHANGES IN CARBON STOCK AND NET CO2 EMISSIONS/REMOVALS FROM SOILS',
+                      'CARBON STOCK CHANGES',
                       'Net carbon stock change in soils', 'Mineral soils', '(kt C)']
      },
      'Soil (kt C)_organic_FLFL': {
          'Table4.A': ['1. Forest land remaining forest land', nan,
-                      'CHANGES IN CARBON STOCK AND NET CO2 EMISSIONS/REMOVALS FROM SOILS',
+                      'CARBON STOCK CHANGES',
                       'Net carbon stock change in soils', 'Organic soils', '(kt C)']
      },
      'Soil_mineral (t C per ha)_LFL': {  # '/', ':' invalid
-         'Table4.A': ['2. Land converted to forest land', nan, 'IMPLIED CARBON-STOCK-CHANGE FACTORS',
+         'Table4.A': ['2. Land converted to forest land', nan, 'IMPLIED CARBON STOCK CHANGE FACTORS',
                       'Net carbon stock change in soils per area', 'Mineral soils', '(t C/ha)']
      },
      'Soil_organic (t C per ha)_LFL': {  # '/', ':' invalid
-         'Table4.A': ['2. Land converted to forest land', nan, 'IMPLIED CARBON-STOCK-CHANGE FACTORS',
+         'Table4.A': ['2. Land converted to forest land', nan, 'IMPLIED CARBON STOCK CHANGE FACTORS',
                       'Net carbon stock change in soils per area', 'Organic soils', '(t C/ha)']
      },
      'Soil_mineral (kt C)_LFL': {
          'Table4.A': ['2. Land converted to forest land', nan,
-                      'CHANGES IN CARBON STOCK AND NET CO2 EMISSIONS/REMOVALS FROM SOILS',
+                      'CARBON STOCK CHANGES',
                       'Net carbon stock change in soils','Mineral soils' , '(kt C)']
      },
      'Soil_organic (kt C)_LFL': {
          'Table4.A': ['2. Land converted to forest land', nan,
-                      'CHANGES IN CARBON STOCK AND NET CO2 EMISSIONS/REMOVALS FROM SOILS',
+                      'CARBON STOCK CHANGES',
                       'Net carbon stock change in soils', 'Organic soils', '(kt C)']
      },
-     'Soil_mineral(t C per ha)_FL-L': {
-         'Table4.B': ['Forest land converted to', nan, 'IMPLIED CARBON-STOCK-CHANGE FACTORS',
+     'Soil_mineral(t C per ha)_FL-L': { # Not area-weighted ! Just an indication!
+         'Table4.B': ['Forest land converted to', nan, 'IMPLIED CARBON STOCK CHANGE FACTORS',
                       'Net carbon stock change in soils per area', 'Mineral soils', '(t C/ha)'],
-         'Table4.C': ['Forest land converted to', nan, 'IMPLIED CARBON-STOCK-CHANGE FACTORS',
+         'Table4.C': ['Forest land converted to', nan, 'IMPLIED CARBON STOCK CHANGE FACTORS',
                       'Net carbon stock change in soils per area', 'Mineral soils', '(t C/ha)'],
-         'Table4.D': ['Forest land converted to', nan, 'IMPLIED CARBON-STOCK-CHANGE FACTORS',
+         'Table4.D': ['Forest land converted to', nan, 'IMPLIED CARBON STOCK CHANGE FACTORS',
                       'Net carbon stock change in soils per area', 'Mineral soils', '(t C/ha)'],
-         'Table4.E': ['Forest land converted to', nan, 'IMPLIED CARBON-STOCK-CHANGE FACTORS',
+         'Table4.E': ['Forest land converted to', nan, 'IMPLIED CARBON STOCK CHANGE FACTORS',
                       'Net carbon stock change in soils per area', 'Mineral soils', '(t C/ha)'],
-         'Table4.F': ['Forest land converted to', nan, 'IMPLIED CARBON-STOCK-CHANGE FACTORS',
+         'Table4.F': ['Forest land converted to', nan, 'IMPLIED CARBON STOCK CHANGE FACTORS',
                       'Net carbon stock change in soils per area', 'Mineral soils', '(t C/ha)']
      },
-     'Soil_organic(t C per ha)_FL-L': {
-         'Table4.B': ['Forest land converted to', nan, 'IMPLIED CARBON-STOCK-CHANGE FACTORS',
+     'Soil_organic(t C per ha)_FL-L': { # Not area-weighted ! Just an indication!
+         'Table4.B': ['Forest land converted to', nan, 'IMPLIED CARBON STOCK CHANGE FACTORS',
                       'Net carbon stock change in soils per area', 'Organic soils', '(t C/ha)'],
-         'Table4.C': ['Forest land converted to', nan, 'IMPLIED CARBON-STOCK-CHANGE FACTORS',
+         'Table4.C': ['Forest land converted to', nan, 'IMPLIED CARBON STOCK CHANGE FACTORS',
                       'Net carbon stock change in soils per area', 'Organic soils', '(t C/ha)'],
-         'Table4.D': ['Forest land converted to', nan, 'IMPLIED CARBON-STOCK-CHANGE FACTORS',
+         'Table4.D': ['Forest land converted to', nan, 'IMPLIED CARBON STOCK CHANGE FACTORS',
                       'Net carbon stock change in soils per area', 'Organic soils', '(t C/ha)'],
-         'Table4.E': ['Forest land converted to', nan, 'IMPLIED CARBON-STOCK-CHANGE FACTORS',
+         'Table4.E': ['Forest land converted to', nan, 'IMPLIED CARBON STOCK CHANGE FACTORS',
                       'Net carbon stock change in soils per area', 'Organic soils', '(t C/ha)'],
-         'Table4.F': ['Forest land converted to', nan, 'IMPLIED CARBON-STOCK-CHANGE FACTORS',
+         'Table4.F': ['Forest land converted to', nan, 'IMPLIED CARBON STOCK CHANGE FACTORS',
                       'Net carbon stock change in soils per area', 'Organic soils', '(t C/ha)']
      },
      'Soil_organic(kt C)_FL-L': {
          'Table4.B': ['Forest land converted to', nan,
-                      'CHANGES IN CARBON STOCK AND NET CO2 EMISSIONS/REMOVALS FROM SOILS',
+                      'CARBON STOCK CHANGES',
                       'Net carbon stock change in soils', 'Organic soils', '(kt C)'],
          'Table4.C': ['Forest land converted to', nan,
-                      'CHANGES IN CARBON STOCK AND NET CO2 EMISSIONS/REMOVALS FROM SOILS',
+                      'CARBON STOCK CHANGES',
                       'Net carbon stock change in soils', 'Organic soils', '(kt C)'],
          'Table4.D': ['Forest land converted to', nan,
-                      'CHANGES IN CARBON STOCK AND NET CO2 EMISSIONS/REMOVALS FROM SOILS',
+                      'CARBON STOCK CHANGES',
                       'Net carbon stock change in soils', 'Organic soils', '(kt C)'],
          'Table4.E': ['Forest land converted to', nan,
-                      'CHANGES IN CARBON STOCK AND NET CO2 EMISSIONS/REMOVALS FROM SOILS',
+                      'CARBON STOCK CHANGES',
                       'Net carbon stock change in soils', 'Organic soils', '(kt C)'],
          'Table4.F': ['Forest land converted to', nan,
-                      'CHANGES IN CARBON STOCK AND NET CO2 EMISSIONS/REMOVALS FROM SOILS',
+                      'CARBON STOCK CHANGES',
                       'Net carbon stock change in soils', 'Organic soils', '(kt C)']
      },
      'Soil_mineral(kt C)_FL-L': {
          'Table4.B': ['Forest land converted to', nan,
-                      'CHANGES IN CARBON STOCK AND NET CO2 EMISSIONS/REMOVALS FROM SOILS',
+                      'CARBON STOCK CHANGES',
                       'Net carbon stock change in soils', 'Mineral soils', '(kt C)'],
          'Table4.C': ['Forest land converted to', nan,
-                      'CHANGES IN CARBON STOCK AND NET CO2 EMISSIONS/REMOVALS FROM SOILS',
+                      'CARBON STOCK CHANGES',
                       'Net carbon stock change in soils', 'Mineral soils', '(kt C)'],
          'Table4.D': ['Forest land converted to', nan,
-                      'CHANGES IN CARBON STOCK AND NET CO2 EMISSIONS/REMOVALS FROM SOILS',
+                      'CARBON STOCK CHANGES',
                       'Net carbon stock change in soils', 'Mineral soils', '(kt C)'],
          'Table4.E': ['Forest land converted to', nan,
-                      'CHANGES IN CARBON STOCK AND NET CO2 EMISSIONS/REMOVALS FROM SOILS',
+                      'CARBON STOCK CHANGES',
                       'Net carbon stock change in soils', 'Mineral soils', '(kt C)'],
          'Table4.F': ['Forest land converted to', nan,
-                      'CHANGES IN CARBON STOCK AND NET CO2 EMISSIONS/REMOVALS FROM SOILS',
+                      'CARBON STOCK CHANGES',
                       'Net carbon stock change in soils', 'Mineral soils', '(kt C)']
      },
 
@@ -359,15 +341,19 @@ If you want to create the timeseries only for some countries specify the ISO3 co
 second line below)
 '''
 COUNTRIES_NAMES: list[Path] = [x for x in (DATA_PATH / 'extracted').iterdir() if x.is_file()]
+
 #COUNTRIES_NAMES: list[Path] = [x for x in COUNTRIES_NAMES if (x.name[:3] in ['deu'] or x.name[:3] in ['aut']) and (not 'Copy' in x.name)]
+
+COUNTRIES_NAMES: list[Path] = [x for x in COUNTRIES_NAMES if x.name[:3] in ['IRL']]
+
 COUNTRIES_NAMES: list[Path] = [x for x in COUNTRIES_NAMES if (not 'Copy' in x.name)]
 '''
 Specify a range of years or single years for which you want to create the timeseries
 '''
-YEARS_LIST: list[int] = list(range(1990, 2022))
+YEARS_LIST: list[int] = list(range(1990, 2024))
 #YEARS_LIST: list[int] = [1990]
 
 '''
 Specify a name of the file with the timeseries
 '''
-RESULT_PATH: Path = DATA_PATH / 'structured' / 'UNFCCC_2023_timeseries.xlsx'
+RESULT_PATH: Path = DATA_PATH / 'structured' / 'UNFCCC_2025_timeseries.xlsx'
