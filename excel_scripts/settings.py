@@ -1,20 +1,42 @@
 from pathlib import Path
 from math import nan
 
-'''
-If you want to extract data from the original CRF tables submitted to the UNFCCC set this parameter to TRUE
-'''
-EXTRACT_DATA: bool = False
 
 '''
-Specify the path where do you keep the downloaded CRF tables (the files for every country should be in a separate
+Unzip the UNFCCC data into folder 'original'
+If the files are already unzipped don't do it again, it takes time!
+'''
+UNZIP_DATA: bool = False
+
+'''
+Specify the path where do you keep the downloaded (zipped or unzipped) CRT tables. 
+The unzipped files for every country should be in a separate
 folder named as the country ISO3 code is, e.g. aus, aut...)
+UNZIP_DATA does it itself if applied.
 '''
 #DATA_PATH: Path = Path(r'D:\MGusti\CurrentWork\UNFCCC_script\data\2023')
-DATA_PATH: Path = Path(r'D:\MGusti\CurrentWork\UNFCCC_script\data\2025')
+#DATA_PATH: Path = Path(r'D:\MGusti\CurrentWork\UNFCCC_script\data\2025')
+DATA_PATH: Path = Path(r'I:\jia\UNFCCC2024')
+
+# Set the working directory
+Path(DATA_PATH).mkdir(parents=True, exist_ok=True)  # Ensure the directory exists
+
+# Create folder 'original' if it doesn't exist
+folder_name_original = DATA_PATH / 'original'
+folder_name_original.mkdir(exist_ok=True)
+
+# Create folder 'extracted' if it doesn't exist
+folder_name_extracted = DATA_PATH / 'extracted'
+folder_name_extracted.mkdir(exist_ok=True)
 
 '''
-Specify the CRF tables you want to extract
+If you want to extract data from the original CRT tables submitted to the UNFCCC set this parameter to TRUE
+'''
+EXTRACT_DATA: bool = True
+
+
+'''
+Specify the CRT tables you want to extract
 '''
 SHEETS_LIST: list[str] = ['Table3','Table3.A', 'Table3.B(a)','Table4', 'Table4.1', 'Table4.A', 'Table4.B', 'Table4.C', 'Table4.D', 'Table4.E', 'Table4.F','Table4(II)']
 #SHEETS_LIST: list[str] = ['Table4', 'Table4.1']
@@ -26,7 +48,7 @@ SHEETS_LIST: list[str] = ['Table3','Table3.A', 'Table3.B(a)','Table4', 'Table4.1
 '''
 Specify a range of years or single years for which you want to extract the data
 '''
-YEARS: list[int] = list(range(1990, 2024))
+YEARS: list[int] = list(range(1990, 2023))
 #YEARS: list[int] = [1990, 1991, 1992]
 #YEARS: list[int] = [2023]
 '''
@@ -37,9 +59,9 @@ COUNTRIES_LIST: list[Path] = [x for x in (DATA_PATH / 'original').iterdir() if x
 If you want to extract data only for some countries then uncomment the line below and specify the ISO3 codes of the
 countries (see example in the second line)
 '''
-# COUNTRIES_LIST: list[Path] = [x for x in COUNTRIES_LIST if x.name[:3] in ['svk' or 'svn' or 'swe' or 'tur' or 'ukr' or 'usa']]
-#COUNTRIES_LIST: list[Path] = [x for x in COUNTRIES_LIST if x.name[:3] in ['deu']]
-COUNTRIES_LIST: list[Path] = [x for x in COUNTRIES_LIST if x.name[:3] in ['irl']]
+# COUNTRIES_LIST: list[Path] = [x for x in COUNTRIES_LIST if x.name[:3].lower() in ['svk' or 'svn' or 'swe' or 'tur' or 'ukr' or 'usa']]
+#COUNTRIES_LIST: list[Path] = [x for x in COUNTRIES_LIST if x.name[:3].lower() in ['deu']]
+COUNTRIES_LIST: list[Path] = [x for x in COUNTRIES_LIST if x.name[:3].lower() in ['irl']]
 
 COUNTRIES_DICT: dict[Path, list[Path]] = {
     DATA_PATH / 'extracted' / f"{country.name[:8].replace('-', '_')}.xlsx":
@@ -53,7 +75,7 @@ COUNTRIES_DICT: dict[Path, list[Path]] = {
 If you want to create a timeseries of one or a few parameters from the extracted data then set CREATE_TIME_SERIES to
 TRUE
 '''
-CREATE_TIME_SERIES: bool = True
+CREATE_TIME_SERIES: bool = False
 
 '''
 Specify the parameter (user) names (e.g. Deforestation) and CRF table categories from which the parameters will be 
@@ -350,10 +372,10 @@ COUNTRIES_NAMES: list[Path] = [x for x in COUNTRIES_NAMES if (not 'Copy' in x.na
 '''
 Specify a range of years or single years for which you want to create the timeseries
 '''
-YEARS_LIST: list[int] = list(range(1990, 2024))
+YEARS_LIST: list[int] = list(range(1990, 2023))
 #YEARS_LIST: list[int] = [1990]
 
 '''
 Specify a name of the file with the timeseries
 '''
-RESULT_PATH: Path = DATA_PATH / 'structured' / 'UNFCCC_2025_timeseries.xlsx'
+RESULT_PATH: Path = DATA_PATH / 'structured' / 'UNFCCC_2024_LULUCF_timeseries.xlsx'
