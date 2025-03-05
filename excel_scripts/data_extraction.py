@@ -314,9 +314,28 @@ class TableCreation:
 
         writeFile(destination=country_destination, sheet_df_dict=self.createDataDict())
 
-    def getYearTableDict(self, sheet_name: str) -> dict[int, dict]:
-        return {int(file_path.name[18:22]): pd.read_excel(file_path, sheet_name=sheet_name, engine='openpyxl').to_dict()
-                for file_path in self._country_sources}
+    # def getYearTableDict(self, sheet_name: str) -> dict[int, dict]:
+    #     return {int(file_path.name[18:22]): pd.read_excel(file_path, sheet_name=sheet_name, engine='openpyxl').to_dict()
+    #             for file_path in self._country_sources}
+
+    def getYearTableDict(self, sheet_name: str) -> dict[int, dict]: # Made it more complex to handle cases when Excel stores values without digital dot which can be treated as integers
+        year_table: dict[int, dict] = {}
+
+        for file_path in self._country_sources:
+            try:
+                year = int(file_path.name[18:22])  # Extract year from filename
+                df = pd.read_excel(file_path, sheet_name=sheet_name, engine='openpyxl')
+
+                # Convert only numbers to float, leaving strings and NaN unchanged
+                df = df.applymap(lambda x: float(x) if isinstance(x, int) else x)
+
+                # Convert DataFrame to dictionary with row-wise structure
+                #year_table[year] = df.set_index("Year").to_dict(orient="index")
+                year_table[year] = df.to_dict()
+
+            except (ValueError, KeyError, IndexError) as e:
+                print(f"Skipping {file_path}: {e}")  # Handle errors gracefully
+        return year_table
 
     @calculateTime
     def createDataDict(self) -> dict[str: pd.DataFrame]:

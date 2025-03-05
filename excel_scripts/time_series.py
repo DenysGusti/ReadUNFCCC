@@ -57,7 +57,11 @@ class TimeSeries:
 
                     for idx, country in enumerate(self._countries_names):
                         for table, list_of_parameters in tables.items():
-                            country_data: dict = pd.read_excel(country, sheet_name=table, engine='openpyxl').to_dict()
+                            pd_tmp = pd.read_excel(country, sheet_name=table, engine='openpyxl')
+                            pd_tmp = pd_tmp.applymap(
+                                lambda x: float(x) if isinstance(x, int) else x)  # convert all numbers to float
+                            country_data: dict = pd_tmp.to_dict()
+                            del pd_tmp
                             #columns: list[str] = list(country_data.keys())[:5]
                             columns: list[str] = list(country_data.keys())[:category_number+1]
                             #print(list(country_data.values())[0].keys())
@@ -105,7 +109,12 @@ class TimeSeries:
 
                 for idx, country in enumerate(self._countries_names):
                     for table, list_of_parameters in tables.items():
-                        country_data: dict = pd.read_excel(country, sheet_name=table, engine='openpyxl').to_dict()
+                        pd_tmp = pd.read_excel(country, sheet_name=table, engine='openpyxl')
+                        pd_tmp = pd_tmp.applymap(
+                            lambda x: float(x) if isinstance(x, int) else x)  # convert all numbers to float
+                        country_data: dict = pd_tmp.to_dict()
+                        del pd_tmp
+
                         # columns: list[str] = list(country_data.keys())[:5]
                         columns: list[str] = list(country_data.keys())[:category_number]
                         #print("columns all= ", list(country_data.keys()))
@@ -118,10 +127,15 @@ class TimeSeries:
                                            ]
 
                         for y in self._years_list:
-                            new_data[y][idx] += sum(
-                                cell if isinstance(cell := country_data[y][r], float) and not isnan(cell) else 0 for r
-                                in
-                                rows)
+                            #new_data[y][idx] += sum(
+                            #    cell if isinstance(cell := country_data[y][r], float) and not isnan(cell) else 0 for r
+                            #    in
+                            #    rows)
+
+                            for r in rows:
+                                new_data[y][idx] += country_data[y][r] if (isinstance(cell := country_data[y][r],
+                                                                                      float)) and not isnan(cell) else 0
+
 
                 result_dict[sheet] = pd.DataFrame(data=new_data)
 
