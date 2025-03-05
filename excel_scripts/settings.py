@@ -15,8 +15,9 @@ folder named as the country ISO3 code is, e.g. aus, aut...)
 UNZIP_DATA does it itself if applied.
 '''
 #DATA_PATH: Path = Path(r'D:\MGusti\CurrentWork\UNFCCC_script\data\2023')
-#DATA_PATH: Path = Path(r'D:\MGusti\CurrentWork\UNFCCC_script\data\2025')
-DATA_PATH: Path = Path(r'I:\jia\UNFCCC2024')
+DATA_PATH: Path = Path(r'D:\MGusti\CurrentWork\UNFCCC_script\data\2025')
+#DATA_PATH: Path = Path(r'I:\jia\UNFCCC2024')
+
 
 # Set the working directory
 Path(DATA_PATH).mkdir(parents=True, exist_ok=True)  # Ensure the directory exists
@@ -48,9 +49,9 @@ SHEETS_LIST: list[str] = ['Table3','Table3.A', 'Table3.B(a)','Table4', 'Table4.1
 '''
 Specify a range of years or single years for which you want to extract the data
 '''
-YEARS: list[int] = list(range(1990, 2023))
+YEARS: list[int] = list(range(1990, 2024))
 #YEARS: list[int] = [1990, 1991, 1992]
-#YEARS: list[int] = [2023]
+#YEARS: list[int] = [2013,2017]
 '''
 Specify the folder name where you out the original CRF tables extracted from the archives
 '''
@@ -61,7 +62,7 @@ countries (see example in the second line)
 '''
 # COUNTRIES_LIST: list[Path] = [x for x in COUNTRIES_LIST if x.name[:3].lower() in ['svk' or 'svn' or 'swe' or 'tur' or 'ukr' or 'usa']]
 #COUNTRIES_LIST: list[Path] = [x for x in COUNTRIES_LIST if x.name[:3].lower() in ['deu']]
-COUNTRIES_LIST: list[Path] = [x for x in COUNTRIES_LIST if x.name[:3].lower() in ['irl']]
+#COUNTRIES_LIST: list[Path] = [x for x in COUNTRIES_LIST if x.name[:3].lower() in ['pol','rou']]
 
 COUNTRIES_DICT: dict[Path, list[Path]] = {
     DATA_PATH / 'extracted' / f"{country.name[:8].replace('-', '_')}.xlsx":
@@ -75,7 +76,12 @@ COUNTRIES_DICT: dict[Path, list[Path]] = {
 If you want to create a timeseries of one or a few parameters from the extracted data then set CREATE_TIME_SERIES to
 TRUE
 '''
-CREATE_TIME_SERIES: bool = False
+CREATE_TIME_SERIES: bool = True
+
+
+# Create folder 'extracted' if it doesn't exist
+folder_name_structured = DATA_PATH / 'structured'
+folder_name_structured.mkdir(exist_ok=True)
 
 '''
 Specify the parameter (user) names (e.g. Deforestation) and CRF table categories from which the parameters will be 
@@ -102,8 +108,8 @@ PARAMETERS: dict[str, dict[str, list[str | float]]] = {  # if the field is empty
 
      'Forest_land_area': {
          'Table4.A': ['1. Forest land remaining forest land', nan, 'ACTIVITY DATA', 'Total area', nan, '(kha)']
-     },
-
+     }
+    ,
 
       'Afforestation_area_20y': {
           'Table4.A': ['2. Land converted to forest land', nan, 'ACTIVITY DATA', 'Total area', nan, '(kha)']
@@ -364,18 +370,18 @@ second line below)
 '''
 COUNTRIES_NAMES: list[Path] = [x for x in (DATA_PATH / 'extracted').iterdir() if x.is_file()]
 
-#COUNTRIES_NAMES: list[Path] = [x for x in COUNTRIES_NAMES if (x.name[:3] in ['deu'] or x.name[:3] in ['aut']) and (not 'Copy' in x.name)]
-
-COUNTRIES_NAMES: list[Path] = [x for x in COUNTRIES_NAMES if x.name[:3] in ['IRL']]
+#COUNTRIES_NAMES: list[Path] = [x for x in COUNTRIES_NAMES if (x.name[:3].lower() in ['deu'] or x.name[:3].lower() in ['aut']) and (not 'Copy' in x.name)]
+#COUNTRIES_NAMES: list[Path] = [x for x in COUNTRIES_NAMES if x.name[:3].lower() in ['pol']]
 
 COUNTRIES_NAMES: list[Path] = [x for x in COUNTRIES_NAMES if (not 'Copy' in x.name)]
 '''
 Specify a range of years or single years for which you want to create the timeseries
 '''
-YEARS_LIST: list[int] = list(range(1990, 2023))
-#YEARS_LIST: list[int] = [1990]
+YEARS_LIST: list[int] = list(range(1990, 2024))
+#YEARS_LIST: list[int] = [2013,2017]
 
 '''
 Specify a name of the file with the timeseries
 '''
-RESULT_PATH: Path = DATA_PATH / 'structured' / 'UNFCCC_2024_LULUCF_timeseries.xlsx'
+RESULT_PATH: Path = DATA_PATH / 'structured' / 'UNFCCC_2025_LULUCF_timeseries_preliminary_updated.xlsx'
+#RESULT_PATH: Path = DATA_PATH / 'structured' / 'UNFCCC_2025_LULUCF_timeseries_preliminary_POL.xlsx'
